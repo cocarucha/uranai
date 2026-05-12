@@ -92,7 +92,8 @@
     background: rgba(80,40,140,0.7);
     color: #d4b8ff;
   }
-  .tab:first-child { border-right: 1px solid rgba(180,140,255,0.2); }
+  .tab:not(:last-child) { border-right: 1px solid rgba(180,140,255,0.2); }
+  .tab { font-size: 0.82rem; padding: 12px 6px; }
 
   /* パネル */
   .panel { display: none; }
@@ -224,6 +225,49 @@
     margin-top: 10px;
     line-height: 1.7;
   }
+
+  .pdf-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 11px;
+    background: linear-gradient(135deg, rgba(180,120,40,0.4), rgba(200,160,60,0.4));
+    border: 1px solid rgba(210,170,80,0.5);
+    border-radius: 8px;
+    color: #f0d080;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+  }
+  .pdf-btn:hover { opacity: 0.85; }
+
+  @media print {
+    body { background: #fff !important; color: #1a0a35 !important; }
+    header, .api-section, .tabs, .card, .copy-btn, .pdf-btn, .notice { display: none !important; }
+    .result-area { display: block !important; }
+    .print-header { display: block !important; }
+    .result-box {
+      background: #fff !important;
+      border: none !important;
+      color: #1a0a35 !important;
+      font-size: 11pt !important;
+      line-height: 2.2 !important;
+      white-space: pre-wrap;
+      padding: 0 !important;
+      font-family: 'Hiragino Mincho ProN','Yu Mincho','MS Mincho',serif !important;
+    }
+  }
+
+  .print-header {
+    display: none;
+    text-align: center;
+    padding: 20px 0 12px;
+    border-bottom: 2px solid #c9a84c;
+    margin-bottom: 20px;
+  }
+  .print-header h1 { font-size: 22pt; color: #1a0a35; letter-spacing: 0.1em; font-family: 'Hiragino Mincho ProN','Yu Mincho',serif; }
+  .print-header p { font-size: 10pt; color: #555; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -247,6 +291,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('shichu')">🌙 四柱推命</button>
     <button class="tab" onclick="switchTab('tesou')">✋ 手相診断</button>
+    <button class="tab" onclick="switchTab('aishō')">💑 相性占い</button>
   </div>
 
   <!-- 四柱推命パネル -->
@@ -284,15 +329,24 @@
         <option value="対人関係運">対人関係運</option>
       </select>
 
-      <label class="lbl">お客様の悩みや状況（任意）</label>
-      <textarea id="s-memo" placeholder="例：転職を考えているが踏み出せない、彼との相性が気になるなど"></textarea>
+      <label class="lbl">お客様の悩みや状況 <span style="color:rgba(255,160,160,0.8); font-size:0.72rem">※ 具体的に書くほど精度が上がります</span></label>
+      <textarea id="s-memo" rows="4" placeholder="例）
+・転職を半年悩んでいる。今の会社を辞めるべきか
+・好きな人がいるが、自分から動いていいのか迷っている
+・副業を始めたいが、どの分野が向いているか知りたい
+・今年中に結婚できるか。婚活に力を入れるべきか"></textarea>
 
       <button class="gen-btn" id="s-btn" onclick="generateShichu()">✨ 鑑定文を生成する</button>
     </div>
 
     <div class="result-area" id="s-result-area" style="display:none">
+      <div class="print-header" id="s-print-header">
+        <h1>四柱推命 本格鑑定書</h1>
+        <p id="s-print-subtitle"></p>
+      </div>
       <div class="result-box" id="s-result"></div>
       <button class="copy-btn" onclick="copyResult('s-result')">📋 鑑定文をコピー</button>
+      <button class="pdf-btn" onclick="printToPDF('shichu')">📄 PDFとして保存する</button>
       <p class="notice">※ AIが生成した鑑定文です。納品前に内容をご確認・編集ください。</p>
     </div>
   </div>
@@ -326,24 +380,139 @@
         </div>
       </div>
 
-      <label class="lbl">手のひらの写真</label>
-      <div class="upload-zone" onclick="document.getElementById('t-file').click()">
+      <label class="lbl">手のひらの写真（1枚目・必須）</label>
+      <div class="upload-zone" onclick="document.getElementById('t-file1').click()">
         <div class="icon">🤚</div>
-        <p>クリックして写真を選択<br><span style="font-size:0.78rem">手を広げ、明るい場所で撮影した写真を使用してください</span></p>
+        <p>クリックして写真を選択<br><span style="font-size:0.78rem">右手または左手・明るい場所で撮影してください</span></p>
       </div>
-      <input type="file" id="t-file" accept="image/*" onchange="previewImage(event)">
-      <img id="t-preview" class="preview-img" style="display:none">
+      <input type="file" id="t-file1" accept="image/*" onchange="previewImage(event,'t-preview1','t-file2-area','t-btn')">
+      <img id="t-preview1" class="preview-img" style="display:none">
 
-      <label class="lbl">お客様の悩みや状況（任意）</label>
-      <textarea id="t-memo" placeholder="例：結婚線が気になる、仕事運が知りたいなど"></textarea>
+      <div id="t-file2-area" style="display:none">
+        <label class="lbl">手のひらの写真（2枚目・任意）<span style="font-size:0.72rem; color:rgba(180,150,220,0.6)">　両手を診断する場合に追加</span></label>
+        <div class="upload-zone" onclick="document.getElementById('t-file2').click()">
+          <div class="icon">🖐</div>
+          <p>もう一方の手の写真を追加<br><span style="font-size:0.78rem">追加しない場合は1枚で診断します</span></p>
+        </div>
+        <input type="file" id="t-file2" accept="image/*" onchange="previewImage2(event)">
+        <img id="t-preview2" class="preview-img" style="display:none">
+      </div>
+
+      <label class="lbl">お客様の悩みや状況 <span style="color:rgba(255,160,160,0.8); font-size:0.72rem">※ 具体的に書くほど精度が上がります</span></label>
+      <textarea id="t-memo" rows="4" placeholder="例）
+・結婚線が気になる。いつ頃結婚できるか知りたい
+・仕事運が低迷している。転職すべきか手相から見てほしい
+・健康面が不安。体に気をつけるべきことがあれば教えてほしい
+・生命線が短いように見えて心配している"></textarea>
 
       <button class="gen-btn" id="t-btn" onclick="generateTesou()" disabled>✨ 診断文を生成する</button>
     </div>
 
     <div class="result-area" id="t-result-area" style="display:none">
+      <div class="print-header" id="t-print-header">
+        <h1>手相 本格鑑定書</h1>
+        <p id="t-print-subtitle"></p>
+      </div>
       <div class="result-box" id="t-result"></div>
       <button class="copy-btn" onclick="copyResult('t-result')">📋 診断文をコピー</button>
+      <button class="pdf-btn" onclick="printToPDF('tesou')">📄 PDFとして保存する</button>
       <p class="notice">※ AIが生成した診断文です。納品前に内容をご確認・編集ください。</p>
+    </div>
+  </div>
+
+  <!-- 相性占いパネル -->
+  <div class="panel" id="panel-aishō">
+    <div class="card">
+      <div class="section-title">Aさん（お客様）の情報</div>
+
+      <label class="lbl">Aさんのお名前</label>
+      <input type="text" id="a-name" placeholder="例：さくらさん">
+
+      <div class="row">
+        <div>
+          <label class="lbl">生年月日</label>
+          <input type="date" id="a-birth">
+        </div>
+        <div>
+          <label class="lbl">出生時刻（任意）</label>
+          <input type="time" id="a-time">
+        </div>
+      </div>
+
+      <label class="lbl">性別</label>
+      <select id="a-gender">
+        <option value="女性">女性</option>
+        <option value="男性">男性</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Bさん（お相手）の情報</div>
+
+      <label class="lbl">Bさんのお名前</label>
+      <input type="text" id="b-name" placeholder="例：たろうさん">
+
+      <div class="row">
+        <div>
+          <label class="lbl">生年月日</label>
+          <input type="date" id="b-birth">
+        </div>
+        <div>
+          <label class="lbl">出生時刻（任意）</label>
+          <input type="time" id="b-time">
+        </div>
+      </div>
+
+      <label class="lbl">性別</label>
+      <select id="b-gender">
+        <option value="男性">男性</option>
+        <option value="女性">女性</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="section-title">関係性と相談内容</div>
+
+      <label class="lbl">お二人の関係</label>
+      <select id="ab-rel">
+        <option value="恋人・交際中">恋人・交際中</option>
+        <option value="気になっている相手">気になっている相手</option>
+        <option value="片思い中">片思い中</option>
+        <option value="元恋人・復縁希望">元恋人・復縁希望</option>
+        <option value="結婚を考えている相手">結婚を考えている相手</option>
+        <option value="ビジネスパートナー">ビジネスパートナー</option>
+        <option value="友人・知人">友人・知人</option>
+        <option value="家族・親族">家族・親族</option>
+        <option value="その他">その他</option>
+      </select>
+
+      <label class="lbl">相談テーマ</label>
+      <select id="ab-theme">
+        <option value="総合的な相性">総合的な相性</option>
+        <option value="恋愛・結婚の相性">恋愛・結婚の相性</option>
+        <option value="長続きするか・将来性">長続きするか・将来性</option>
+        <option value="ビジネス・仕事の相性">ビジネス・仕事の相性</option>
+        <option value="復縁の可能性">復縁の可能性</option>
+        <option value="関係をよくするアドバイス">関係をよくするアドバイス</option>
+      </select>
+
+      <label class="lbl">状況や悩み <span style="color:rgba(255,160,160,0.8); font-size:0.72rem">※ 具体的に書くほど精度が上がります</span></label>
+      <textarea id="ab-memo" rows="5" placeholder="例）
+・3ヶ月付き合っているが、最近連絡が減ってきた。相手の気持ちが知りたい
+・職場の同僚で、告白しようか迷っている。脈ありか教えてほしい
+・半年前に別れた元彼と復縁したい。可能性はあるか
+・新しいビジネスパートナーと組もうか検討中。相性や注意点を知りたい
+・友人と価値観がぶつかることが増えた。どう付き合えばいいか"></textarea>
+
+      <button class="gen-btn" id="ab-btn" onclick="generateAisho()">✨ 相性を鑑定する</button>
+    </div>
+
+    <div class="result-area" id="ab-result-area" style="display:none">
+      <div class="result-box" id="ab-result"></div>
+      <button class="copy-btn" onclick="copyResult('ab-result')">📋 鑑定文をコピー</button>
+      <p class="notice">※ AIが生成した鑑定文です。納品前に内容をご確認・編集ください。</p>
     </div>
   </div>
 
@@ -378,25 +547,43 @@
   function switchTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const tabs = document.querySelectorAll('.tab');
     if(tab === 'shichu') {
-      document.querySelectorAll('.tab')[0].classList.add('active');
+      tabs[0].classList.add('active');
       document.getElementById('panel-shichu').classList.add('active');
-    } else {
-      document.querySelectorAll('.tab')[1].classList.add('active');
+    } else if(tab === 'tesou') {
+      tabs[1].classList.add('active');
       document.getElementById('panel-tesou').classList.add('active');
+    } else {
+      tabs[2].classList.add('active');
+      document.getElementById('panel-aishō').classList.add('active');
     }
   }
 
-  // 画像プレビュー
-  function previewImage(event) {
+  // 画像プレビュー（1枚目）
+  function previewImage(event, previewId, nextAreaId, btnId) {
     const file = event.target.files[0];
     if(!file) return;
     const reader = new FileReader();
     reader.onload = e => {
-      const img = document.getElementById('t-preview');
+      const img = document.getElementById(previewId);
       img.src = e.target.result;
       img.style.display = 'block';
-      document.getElementById('t-btn').disabled = false;
+      if(nextAreaId) document.getElementById(nextAreaId).style.display = 'block';
+      if(btnId) document.getElementById(btnId).disabled = false;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // 画像プレビュー（2枚目）
+  function previewImage2(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('t-preview2');
+      img.src = e.target.result;
+      img.style.display = 'block';
     };
     reader.readAsDataURL(file);
   }
@@ -558,9 +745,10 @@ ${memo ? 'お客様の状況・悩み：' + memo : ''}
     const hand = document.getElementById('t-hand').value;
     const theme = document.getElementById('t-theme').value;
     const memo = document.getElementById('t-memo').value.trim();
-    const fileInput = document.getElementById('t-file');
+    const file1 = document.getElementById('t-file1').files[0];
+    const file2 = document.getElementById('t-file2').files[0];
 
-    if(!fileInput.files[0]) { alert('手のひらの写真を選択してください'); return; }
+    if(!file1) { alert('1枚目の写真を選択してください'); return; }
 
     const btn = document.getElementById('t-btn');
     btn.disabled = true;
@@ -572,21 +760,26 @@ ${memo ? 'お客様の状況・悩み：' + memo : ''}
     resultBox.className = 'result-box loading';
     resultBox.textContent = '手相を精密に読み取り、本格鑑定書を生成中です。7000字以上の鑑定書を作成しているため、1〜2分かかります。そのままお待ちください...';
 
-    const file = fileInput.files[0];
-    const base64 = await new Promise((res, rej) => {
+    // base64変換
+    const toBase64 = (file) => new Promise((res, rej) => {
       const reader = new FileReader();
       reader.onload = e => res(e.target.result.split(',')[1]);
       reader.onerror = rej;
       reader.readAsDataURL(file);
     });
 
-    const prompt = `あなたは手相鑑定を40年以上続け、これまで1万人以上の手を読んできた最高峰の手相占い師です。鑑定料1万円以上をいただく本物のプロとして、添付された${hand}の写真を隅々まで観察し、${name}への人生が変わるほどの本格手相鑑定書を作成してください。文字数は合計7000〜9000字を目標にしてください。
+    const base64_1 = await toBase64(file1);
+    const base64_2 = file2 ? await toBase64(file2) : null;
+    const handDesc = file2 ? '両手（2枚の写真）' : hand;
+
+    const prompt = `あなたは手相鑑定を40年以上続け、これまで1万人以上の手を読んできた最高峰の手相占い師です。鑑定料1万円以上をいただく本物のプロとして、添付された${handDesc}の写真を隅々まで観察し、${name}への人生が変わるほどの本格手相鑑定書を作成してください。文字数は合計7000〜9000字を目標にしてください。
 
 【お客様情報】
 名前：${name}
-診断する手：${hand}
+診断する手：${handDesc}
 ご相談テーマ：${theme}
 ${memo ? 'お客様の状況・悩み：' + memo : ''}
+${base64_2 ? '※ 両手の写真が2枚添付されています。右手と左手を比較しながら鑑定してください。' : ''}
 
 ━━━━━━━━━━━━━━━━━━━━
 【鑑定書の構成】以下8つのセクションを、各700〜1200字で丁寧に書いてください
@@ -599,6 +792,7 @@ ${memo ? 'お客様の状況・悩み：' + memo : ''}
 ・肌の質感・色・手全体の印象から読むその人の「気」
 ・指の長さ・形・間隔から読める性格・思考スタイル
 ・手全体が発しているオーラや第一印象——「この手を持つ人はどんな人間か」
+${base64_2 ? '・両手を比較した場合の特徴的な違いとその意味' : ''}
 
 ■ 第二章：生命線の精密鑑定（900字）
 生命線を詳細に観察し、以下を丁寧に解説してください。
@@ -643,7 +837,6 @@ ${memo ? 'お客様の状況・悩み：' + memo : ''}
 ・${theme}における「この手相が持つ最大の強み」
 ・${theme}において「今すぐ変えるべきこと」
 ${memo ? '・「' + memo + '」という悩みに対して、この手相はどんな答えを示しているか' : ''}
-・手相から見た、${theme}が大きく動くタイミングはいつか
 
 ■ 第七章：開運のための実践アドバイス（700字）
 この手相から読み取った情報に基づいた、具体的で実践的なアドバイスを書いてください。
@@ -651,7 +844,6 @@ ${memo ? '・「' + memo + '」という悩みに対して、この手相はど�
 ・日常生活で取り入れると良い習慣・行動
 ・手相は変わる——${name}がどんな意識を持てば、どの線が育つか
 ・${theme}に関して、今すぐできる具体的なアクション3つ
-・手を見るたびに思い出してほしい、一番大切なメッセージ
 
 ■ 第八章：あなたの手が語る、人生の物語（800字）
 鑑定書全体を踏まえ、この手相が語る${name}の人生の本質を伝えてください。
@@ -659,7 +851,6 @@ ${memo ? '・「' + memo + '」という悩みに対して、この手相はど�
 ・${name}が生まれ持った使命と才能
 ・今まさにこの鑑定書を読んでいる${name}に、最も伝えたいこと
 ・未来に向けて、この手相を持つ人間として生きていくための言葉
-単なる励ましではなく、この手相だからこそ言える、魂に刻まれる言葉を書いてください。
 
 ━━━━━━━━━━━━━━━━━━━━
 【絶対に守るルール】
@@ -670,6 +861,15 @@ ${memo ? '・「' + memo + '」という悩みに対して、この手相はど�
 ・「一般的な手相解説」は絶対に書かない。この手相だからこそ言えることだけを書く
 ・読んだ人が「自分の手をこんなに深く見てもらったのは初めて」と感動するリアリティを
 ・合計文字数7000字以上を厳守すること。短くまとめない、省略しない`;
+
+    // コンテンツブロックを構築（1枚目必須、2枚目任意）
+    const contentBlocks = [
+      { type: 'image', source: { type: 'base64', media_type: file1.type || 'image/jpeg', data: base64_1 } }
+    ];
+    if(base64_2) {
+      contentBlocks.push({ type: 'image', source: { type: 'base64', media_type: file2.type || 'image/jpeg', data: base64_2 } });
+    }
+    contentBlocks.push({ type: 'text', text: prompt });
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -683,13 +883,7 @@ ${memo ? '・「' + memo + '」という悩みに対して、この手相はど�
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
           max_tokens: 16000,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
-              { type: 'text', text: prompt }
-            ]
-          }]
+          messages: [{ role: 'user', content: contentBlocks }]
         })
       });
       const data = await res.json();
@@ -720,6 +914,173 @@ ${memo ? '・「' + memo + '」という悩みに対して、この手相はど�
       document.body.removeChild(ta);
       alert('コピーしました！');
     });
+  }
+
+  function printToPDF(type) {
+    if(type === 'shichu') {
+      const name = document.getElementById('s-name').value || 'お客様';
+      const birth = document.getElementById('s-birth').value;
+      const theme = document.getElementById('s-theme').value;
+      const d = birth ? new Date(birth) : null;
+      const birthStr = d ? `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日生` : '';
+      document.getElementById('s-print-subtitle').textContent =
+        `${name}　${birthStr}　ご相談：${theme}`;
+      document.getElementById('panel-tesou').style.display = 'none';
+      document.getElementById('panel-shichu').style.display = 'block';
+      document.getElementById('panel-shichu').classList.add('active');
+    } else {
+      const name = document.getElementById('t-name').value || 'お客様';
+      const hand = document.getElementById('t-hand').value;
+      const theme = document.getElementById('t-theme').value;
+      document.getElementById('t-print-subtitle').textContent =
+        `${name}　${hand}　ご相談：${theme}`;
+      document.getElementById('panel-shichu').style.display = 'none';
+      document.getElementById('panel-tesou').style.display = 'block';
+      document.getElementById('panel-tesou').classList.add('active');
+    }
+    window.print();
+    setTimeout(() => {
+      document.getElementById('panel-shichu').style.display = '';
+      document.getElementById('panel-tesou').style.display = '';
+    }, 1000);
+  }
+
+  // 相性占い生成
+  async function generateAisho() {
+    const apiKey = getApiKey();
+    if(!apiKey) return;
+
+    const aName  = document.getElementById('a-name').value.trim()  || 'Aさん';
+    const aBirth = document.getElementById('a-birth').value;
+    const aTime  = document.getElementById('a-time').value;
+    const aGender= document.getElementById('a-gender').value;
+    const bName  = document.getElementById('b-name').value.trim()  || 'Bさん';
+    const bBirth = document.getElementById('b-birth').value;
+    const bTime  = document.getElementById('b-time').value;
+    const bGender= document.getElementById('b-gender').value;
+    const rel    = document.getElementById('ab-rel').value;
+    const theme  = document.getElementById('ab-theme').value;
+    const memo   = document.getElementById('ab-memo').value.trim();
+
+    if(!aBirth || !bBirth) { alert('お二人の生年月日を入力してください'); return; }
+
+    const btn = document.getElementById('ab-btn');
+    btn.disabled = true;
+    btn.textContent = '鑑定中...';
+
+    const resultArea = document.getElementById('ab-result-area');
+    const resultBox  = document.getElementById('ab-result');
+    resultArea.style.display = 'block';
+    resultBox.className = 'result-box loading';
+    resultBox.textContent = '二人の命式を照合し、相性鑑定書を生成中です。しばらくお待ちください...';
+
+    const fmt = (d) => { const dt = new Date(d); return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`; };
+    const today = new Date();
+
+    const prompt = `あなたは四柱推命を40年以上研究してきた最高峰の占い師です。二人の命式を精密に読み解き、本格的な相性鑑定書を作成してください。文字数は6000〜8000字を目標にしてください。
+
+━━━━━━━━━━━━━━━━━━━━
+【鑑定対象】
+━━━━━━━━━━━━━━━━━━━━
+【Aさん（お客様）】
+名前：${aName}
+生年月日：${fmt(aBirth)}
+出生時刻：${aTime || '不明'}
+性別：${aGender}
+
+【Bさん（お相手）】
+名前：${bName}
+生年月日：${fmt(bBirth)}
+出生時刻：${bTime || '不明'}
+性別：${bGender}
+
+お二人の関係：${rel}
+相談テーマ：${theme}
+現在の年：${today.getFullYear()}年
+${memo ? 'お客様の状況・悩み：' + memo : ''}
+
+━━━━━━━━━━━━━━━━━━━━
+【鑑定書の構成】
+━━━━━━━━━━━━━━━━━━━━
+
+## 第一章：お二人それぞれの命式（800字）
+・${aName}の命式（年柱・月柱・日柱・時柱）と日主の性質を簡潔に
+・${bName}の命式（年柱・月柱・日柱・時柱）と日主の性質を簡潔に
+・それぞれの五行の特徴と、人間としての本質
+
+## 第二章：二つの命式が出会うとき（1000字）
+・五行の相生・相剋関係から見た、二人のエネルギーの相互作用
+・「引き合う理由」——なぜこの二人が惹かれ合うのか、命式が教えること
+・「摩擦が生まれる理由」——どこでぶつかりやすいか、なぜそうなるのか
+・二人の関係の「本質的なテーマ」とは何か
+
+## 第三章：${theme}の詳細鑑定（1200字）
+・${theme}において、この二人の相性は命式から見てどうか
+・今の大運・流年が二人の関係に与えている影響
+・${rel}として、今後1〜2年で起きやすいこと
+・この関係の「最大の可能性」と「最大のリスク」
+${memo ? '・「' + memo + '」という状況に対して、命式はどんな答えを示しているか' : ''}
+
+## 第四章：${aName}から見た${bName}（800字）
+・${aName}の命式から見て、${bName}はどんな存在か
+・${aName}が${bName}に惹かれる命式的な理由
+・${aName}が${bName}との関係で成長できること
+・${aName}が気をつけるべきこと
+
+## 第五章：${bName}から見た${aName}（800字）
+・${bName}の命式から見て、${aName}はどんな存在か
+・${bName}が${aName}に惹かれる命式的な理由
+・この関係で${bName}が得るもの、与えるもの
+・${bName}側の視点から見た関係の課題
+
+## 第六章：関係をより良くするためのアドバイス（800字）
+・二人が長く良い関係を続けるために最も大切なこと
+・お互いの五行的な特徴を活かした、具体的な接し方
+・避けるべきパターン・行動
+・この関係が最も輝くタイミング（時期・状況）
+
+## 第七章：${aName}への手紙（600字）
+・二人の命式全体を見通して、${aName}だけに伝えたいメッセージ
+・この出会いが持つ意味、この関係から学べること
+・これからの二人に向けた、魂に届く言葉
+
+━━━━━━━━━━━━━━━━━━━━
+【絶対に守るルール】
+━━━━━━━━━━━━━━━━━━━━
+・${aName}に直接語りかける、温かく誠実な文体を貫く
+・「相性が良い/悪い」という単純な断言を避け、深い洞察を伝える
+・専門用語（干支・五行・十神など）は必ず平易に解説する
+・読んだ人が「この二人のことを本当にわかってくれた」と感じる深さを
+・希望と現実のバランスを大切に。ネガティブな点も愛を持って伝える
+・合計6000字以上を厳守すること`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 16000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      if(data.error) throw new Error(data.error.message);
+      const text = data.content?.map(c => c.text || '').join('') || '生成に失敗しました。';
+      resultBox.className = 'result-box';
+      resultBox.textContent = text;
+    } catch(e) {
+      resultBox.className = 'result-box';
+      resultBox.textContent = 'エラー：' + e.message + '\n\nAPIキーを確認してください。';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✨ 相性を鑑定する';
   }
 </script>
 </body>
