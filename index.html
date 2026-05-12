@@ -556,6 +556,23 @@
 </div>
 
 <script>
+  // ── Google スプレッドシート自動保存 ──
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyeMnEk5U3Mnr37aV4-s9cppLobsaVagIE4lyS2xYdPBaEfKHGboehfLF2KxMxDeDAp-w/exec';
+
+  async function saveToSheet(type, name, birth, theme, result) {
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, name, birth, theme, result })
+      });
+      console.log('スプレッドシートに保存しました');
+    } catch(e) {
+      console.warn('保存エラー:', e.message);
+    }
+  }
+
   // APIキー折りたたみ
   function toggleApi() {
     const section = document.getElementById('api-section');
@@ -780,13 +797,9 @@ ${memo ? 'お客様の状況・悩み：' + memo : ''}
       const text = data.content?.map(c => c.text || '').join('') || '生成に失敗しました。';
       resultBox.className = 'result-box';
       resultBox.textContent = text;
-    } catch(e) {
-      resultBox.className = 'result-box';
-      resultBox.textContent = 'エラー：' + e.message + '\n\nAPIキーを確認してください。';
-    }
-
-    btn.disabled = false;
-    btn.textContent = '✨ 鑑定文を生成する';
+      // スプレッドシートに自動保存
+      const birthVal = document.getElementById('s-birth').value;
+      saveToSheet('四柱推命', name, birthVal, theme, text);
   }
 
   // 手相診断
@@ -944,6 +957,8 @@ ${memo ? '・「' + memo + '」という悩みに対して、この手相はど�
       const text = data.content?.map(c => c.text || '').join('') || '生成に失敗しました。';
       resultBox.className = 'result-box';
       resultBox.textContent = text;
+      // スプレッドシートに自動保存
+      saveToSheet('手相診断', name, '', theme, text);
     } catch(e) {
       resultBox.className = 'result-box';
       resultBox.textContent = 'エラー：' + e.message + '\n\nAPIキーを確認してください。';
@@ -1127,6 +1142,10 @@ ${memo ? '・「' + memo + '」という状況に対して、命式はどんな�
       const text = data.content?.map(c => c.text || '').join('') || '生成に失敗しました。';
       resultBox.className = 'result-box';
       resultBox.textContent = text;
+      // スプレッドシートに自動保存
+      const nameStr = `${aName} × ${bName}`;
+      const birthStr = `A:${fmt(aBirth)} / B:${fmt(bBirth)}`;
+      saveToSheet('相性占い', nameStr, birthStr, `${rel}／${theme}`, text);
     } catch(e) {
       resultBox.className = 'result-box';
       resultBox.textContent = 'エラー：' + e.message + '\n\nAPIキーを確認してください。';
