@@ -557,17 +557,15 @@
 
 <script>
   // ── Google スプレッドシート自動保存 ──
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyeMnEk5U3Mnr37aV4-s9cppLobsaVagIE4lyS2xYdPBaEfKHGboehfLF2KxMxDeDAp-w/exec';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyLNAjtrdrzfJqZyfbsTwOWANswwEADiRhoq0wttFhjO7rLN-bjKltav0fTYoQcA7Pyyw/exec';
 
-  async function saveToSheet(type, name, birth, theme, result) {
+  function saveToSheet(type, name, birth, theme, result) {
     try {
-      await fetch(GAS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, name, birth, theme, result })
-      });
-      console.log('スプレッドシートに保存しました');
+      const payload = JSON.stringify({ type, name, birth, theme, result });
+      // URLパラメータとして送信（CORS制限を完全回避）
+      const url = GAS_URL + '?payload=' + encodeURIComponent(payload);
+      fetch(url, { method: 'GET', mode: 'no-cors' });
+      console.log('スプレッドシートに送信しました');
     } catch(e) {
       console.warn('保存エラー:', e.message);
     }
