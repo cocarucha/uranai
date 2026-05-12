@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔮 占い師ツール</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Georgia', serif;
+    background: #0d0a1a;
+    color: #e8dff5;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+    border-bottom: 1px solid rgba(180,140,255,0.15);
+    background: linear-gradient(180deg, rgba(80,40,120,0.3) 0%, transparent 100%);
+  }
+  header h1 { font-size: 1.8rem; font-weight: 400; letter-spacing: 0.12em; color: #d4b8ff; }
+  header p { font-size: 0.8rem; color: rgba(180,150,220,0.6); margin-top: 6px; letter-spacing: 0.1em; }
+
+  .container { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  /* APIキー設定 */
+  .api-section {
+    background: rgba(40,20,70,0.6);
+    border: 1px solid rgba(180,140,255,0.2);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .api-section label { font-size: 0.8rem; color: rgba(180,150,220,0.8); white-space: nowrap; letter-spacing: 0.05em; }
+  .api-section input {
+    flex: 1;
+    min-width: 200px;
+    background: rgba(20,10,40,0.8);
+    border: 1px solid rgba(180,140,255,0.25);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: #c8a8ff;
+    font-family: monospace;
+    font-size: 0.85rem;
+    outline: none;
+  }
+  .api-section input:focus { border-color: rgba(180,140,255,0.6); }
+  .api-save-btn {
+    padding: 9px 18px;
+    background: rgba(100,60,180,0.5);
+    border: 1px solid rgba(180,140,255,0.4);
+    border-radius: 8px;
+    color: #d4b8ff;
+    font-family: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.2s;
+  }
+  .api-save-btn:hover { background: rgba(120,70,200,0.6); }
+  .api-status { font-size: 0.75rem; width: 100%; color: rgba(150,220,150,0.8); display: none; }
+
+  /* タブ */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(180,140,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .tab {
+    flex: 1;
+    padding: 13px;
+    text-align: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    background: rgba(20,10,40,0.6);
+    color: rgba(180,150,220,0.6);
+    border: none;
+    font-family: inherit;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: rgba(80,40,140,0.7);
+    color: #d4b8ff;
+  }
+  .tab:first-child { border-right: 1px solid rgba(180,140,255,0.2); }
+
+  /* パネル */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* フォームカード */
+  .card {
+    background: rgba(25,12,50,0.7);
+    border: 1px solid rgba(180,140,255,0.15);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    color: rgba(180,140,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(180,140,255,0.1);
+  }
+
+  label.lbl {
+    display: block;
+    font-size: 0.78rem;
+    color: rgba(180,150,220,0.7);
+    margin-bottom: 5px;
+    letter-spacing: 0.05em;
+  }
+
+  input[type="text"], input[type="date"], input[type="time"], select, textarea {
+    width: 100%;
+    background: rgba(15,8,35,0.8);
+    border: 1px solid rgba(180,140,255,0.2);
+    border-radius: 8px;
+    padding: 10px 13px;
+    color: #e0d0ff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: rgba(180,140,255,0.5); }
+  select option { background: #1a0a40; }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width:480px) { .row { grid-template-columns: 1fr; } }
+
+  /* 生成ボタン */
+  .gen-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(100,50,180,0.8), rgba(140,60,200,0.8));
+    border: 1px solid rgba(200,150,255,0.4);
+    border-radius: 10px;
+    color: #f0e0ff;
+    font-family: inherit;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .gen-btn:hover { opacity: 0.9; }
+  .gen-btn:active { transform: scale(0.99); }
+  .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* 画像アップロード */
+  .upload-zone {
+    border: 1px dashed rgba(180,140,255,0.3);
+    border-radius: 10px;
+    padding: 1.8rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .upload-zone:hover { background: rgba(100,60,160,0.1); }
+  .upload-zone .icon { font-size: 2rem; margin-bottom: 8px; }
+  .upload-zone p { font-size: 0.82rem; color: rgba(180,150,220,0.6); line-height: 1.6; }
+  input[type="file"] { display: none; }
+  .preview-img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid rgba(180,140,255,0.2);
+    margin-bottom: 1rem;
+  }
+
+  /* 結果 */
+  .result-area { margin-top: 1rem; }
+  .result-box {
+    background: rgba(15,8,35,0.9);
+    border: 1px solid rgba(180,140,255,0.2);
+    border-radius: 12px;
+    padding: 1.4rem;
+    font-size: 0.9rem;
+    line-height: 2;
+    color: #ddd0f5;
+    white-space: pre-wrap;
+    min-height: 100px;
+  }
+  .result-box.loading { color: rgba(180,150,220,0.5); font-style: italic; }
+
+  .copy-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid rgba(180,140,255,0.25);
+    border-radius: 8px;
+    color: rgba(180,150,220,0.7);
+    font-family: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.2s;
+  }
+  .copy-btn:hover { background: rgba(100,60,160,0.15); }
+
+  .notice {
+    font-size: 0.72rem;
+    color: rgba(150,130,180,0.5);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔮 占い師ツール</h1>
+  <p>四柱推命・手相診断 鑑定文ジェネレーター</p>
+</header>
+
+<div class="container">
+
+  <!-- APIキー設定 -->
+  <div class="api-section">
+    <label>Anthropic APIキー</label>
+    <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off">
+    <button class="api-save-btn" onclick="saveApiKey()">保存</button>
+    <p class="api-status" id="api-status">✓ APIキーを保存しました</p>
+  </div>
+
+  <!-- タブ -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('shichu')">🌙 四柱推命</button>
+    <button class="tab" onclick="switchTab('tesou')">✋ 手相診断</button>
+  </div>
+
+  <!-- 四柱推命パネル -->
+  <div class="panel active" id="panel-shichu">
+    <div class="card">
+      <div class="section-title">お客様の基本情報</div>
+
+      <label class="lbl">お名前（ニックネーム可）</label>
+      <input type="text" id="s-name" placeholder="例：さくらさん">
+
+      <div class="row">
+        <div>
+          <label class="lbl">生年月日</label>
+          <input type="date" id="s-birth">
+        </div>
+        <div>
+          <label class="lbl">出生時刻（任意）</label>
+          <input type="time" id="s-time">
+        </div>
+      </div>
+
+      <label class="lbl">性別</label>
+      <select id="s-gender">
+        <option value="女性">女性</option>
+        <option value="男性">男性</option>
+        <option value="その他">その他</option>
+      </select>
+
+      <label class="lbl">相談テーマ</label>
+      <select id="s-theme">
+        <option value="総合運">総合運（全体的な運勢）</option>
+        <option value="恋愛・結婚運">恋愛・結婚運</option>
+        <option value="仕事・キャリア運">仕事・キャリア運</option>
+        <option value="金運・財運">金運・財運</option>
+        <option value="対人関係運">対人関係運</option>
+      </select>
+
+      <label class="lbl">お客様の悩みや状況（任意）</label>
+      <textarea id="s-memo" placeholder="例：転職を考えているが踏み出せない、彼との相性が気になるなど"></textarea>
+
+      <button class="gen-btn" id="s-btn" onclick="generateShichu()">✨ 鑑定文を生成する</button>
+    </div>
+
+    <div class="result-area" id="s-result-area" style="display:none">
+      <div class="result-box" id="s-result"></div>
+      <button class="copy-btn" onclick="copyResult('s-result')">📋 鑑定文をコピー</button>
+      <p class="notice">※ AIが生成した鑑定文です。納品前に内容をご確認・編集ください。</p>
+    </div>
+  </div>
+
+  <!-- 手相診断パネル -->
+  <div class="panel" id="panel-tesou">
+    <div class="card">
+      <div class="section-title">お客様の情報</div>
+
+      <label class="lbl">お名前（ニックネーム可）</label>
+      <input type="text" id="t-name" placeholder="例：ゆいさん">
+
+      <div class="row">
+        <div>
+          <label class="lbl">診断する手</label>
+          <select id="t-hand">
+            <option value="右手">右手</option>
+            <option value="左手">左手</option>
+            <option value="両手">両手</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">相談テーマ</label>
+          <select id="t-theme">
+            <option value="総合運">総合運</option>
+            <option value="恋愛・結婚運">恋愛・結婚運</option>
+            <option value="仕事運">仕事運</option>
+            <option value="金運">金運</option>
+            <option value="健康運">健康運</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="lbl">手のひらの写真</label>
+      <div class="upload-zone" onclick="document.getElementById('t-file').click()">
+        <div class="icon">🤚</div>
+        <p>クリックして写真を選択<br><span style="font-size:0.78rem">手を広げ、明るい場所で撮影した写真を使用してください</span></p>
+      </div>
+      <input type="file" id="t-file" accept="image/*" onchange="previewImage(event)">
+      <img id="t-preview" class="preview-img" style="display:none">
+
+      <label class="lbl">お客様の悩みや状況（任意）</label>
+      <textarea id="t-memo" placeholder="例：結婚線が気になる、仕事運が知りたいなど"></textarea>
+
+      <button class="gen-btn" id="t-btn" onclick="generateTesou()" disabled>✨ 診断文を生成する</button>
+    </div>
+
+    <div class="result-area" id="t-result-area" style="display:none">
+      <div class="result-box" id="t-result"></div>
+      <button class="copy-btn" onclick="copyResult('t-result')">📋 診断文をコピー</button>
+      <p class="notice">※ AIが生成した診断文です。納品前に内容をご確認・編集ください。</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // APIキー管理
+  window.onload = function() {
+    const saved = localStorage.getItem('uranai_api_key');
+    if(saved) {
+      document.getElementById('api-key').value = saved;
+      document.getElementById('api-status').style.display = 'block';
+    }
+  };
+
+  function saveApiKey() {
+    const key = document.getElementById('api-key').value.trim();
+    if(!key) { alert('APIキーを入力してください'); return; }
+    localStorage.setItem('uranai_api_key', key);
+    const status = document.getElementById('api-status');
+    status.style.display = 'block';
+    status.textContent = '✓ APIキーを保存しました（このブラウザに記録されます）';
+  }
+
+  function getApiKey() {
+    const key = document.getElementById('api-key').value.trim() || localStorage.getItem('uranai_api_key');
+    if(!key) { alert('APIキーを入力・保存してください'); return null; }
+    return key;
+  }
+
+  // タブ切り替え
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    if(tab === 'shichu') {
+      document.querySelectorAll('.tab')[0].classList.add('active');
+      document.getElementById('panel-shichu').classList.add('active');
+    } else {
+      document.querySelectorAll('.tab')[1].classList.add('active');
+      document.getElementById('panel-tesou').classList.add('active');
+    }
+  }
+
+  // 画像プレビュー
+  function previewImage(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('t-preview');
+      img.src = e.target.result;
+      img.style.display = 'block';
+      document.getElementById('t-btn').disabled = false;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // 四柱推命
+  async function generateShichu() {
+    const apiKey = getApiKey();
+    if(!apiKey) return;
+
+    const name = document.getElementById('s-name').value.trim() || 'お客様';
+    const birth = document.getElementById('s-birth').value;
+    const time = document.getElementById('s-time').value;
+    const gender = document.getElementById('s-gender').value;
+    const theme = document.getElementById('s-theme').value;
+    const memo = document.getElementById('s-memo').value.trim();
+
+    if(!birth) { alert('生年月日を入力してください'); return; }
+
+    const btn = document.getElementById('s-btn');
+    btn.disabled = true;
+    btn.textContent = '生成中...';
+
+    const resultArea = document.getElementById('s-result-area');
+    const resultBox = document.getElementById('s-result');
+    resultArea.style.display = 'block';
+    resultBox.className = 'result-box loading';
+    resultBox.textContent = '本格鑑定書を生成中です。8000字以上の鑑定書を作成しているため、1〜2分かかります。そのままお待ちください...';
+
+    const d = new Date(birth);
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const monthDiff = today.getMonth() - d.getMonth();
+    if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < d.getDate())) age--;
+    const prompt = `あなたは四柱推命を40年以上研究し、これまで1万人以上を鑑定してきた最高峰の占い師です。鑑定料1万円以上をいただく本物のプロとして、以下のお客様に人生が変わるほどの本格鑑定書を書いてください。文字数は合計8000〜10000字を目標にしてください。
+
+【お客様情報】
+名前：${name}
+生年月日：${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日
+現在の年齢：${age}歳（今年${today.getFullYear()}年）
+出生時刻：${time || '不明'}
+性別：${gender}
+ご相談テーマ：${theme}
+${memo ? 'お客様の状況・悩み：' + memo : ''}
+
+━━━━━━━━━━━━━━━━━━━━
+【鑑定書の構成】以下8つのセクションを、各800〜1500字で丁寧に書いてください
+━━━━━━━━━━━━━━━━━━━━
+
+■ 第一章：命式の精密解読（1000字）
+年柱・月柱・日柱・時柱の干支を正確に特定し、それぞれの意味を丁寧に解説してください。
+・年干支／月干支／日干支／時干支を明示
+・日主（日干）の五行・十干の本質的な意味を深く説明
+・命式全体の五行バランス（木火土金水の強弱）を分析
+・格局（内格・外格）の判定と、その意味
+・用神・喜神・忌神・仇神を特定し、「なぜそれが用神なのか」を論理的に解説
+・命式の強さ（身強・身弱）の判定
+
+■ 第二章：あなたという人間の本質（1200字）
+命式から読み取れる、この人だけの深い人間像を描いてください。
+・日主の五行が示す「魂の性質」——この人は根本的にどんな人間か
+・月支・日支から読む「内なる自分」と「外に見せる自分」のギャップ
+・この命式が示す「人生における最大の強み」と「最大の試練」
+・対人関係のパターン——この人はどのように人と関わり、どこで摩擦が起きやすいか
+・仕事や創造に対するスタンス——何に喜びを感じ、何に消耗するか
+・この命式を持って生まれた人間が、人生で必ず向き合うことになるテーマ
+
+■ 第三章：${theme}の徹底鑑定（1500字）
+現在の大運・今年の流年を踏まえ、${theme}について徹底的に鑑定してください。
+・現在どの大運（10年運）にいるか、その大運の意味と影響
+・今年（${today.getFullYear()}年）の流年との相互作用
+・${theme}における「今のあなたの状態」——命式から見た現在地
+・直近1年（月ごと）の運気の流れ——特に注意すべき月と追い風が来る月を具体的に
+・${theme}において「絶対にすべきこと」と「絶対に避けるべきこと」
+・${memo ? 'お客様が抱える「' + memo + '」という悩みに対して、命式はどんな答えを示しているか' : 'この命式が示す、' + theme + 'における本質的なメッセージ'}
+
+■ 第四章：恋愛・結婚・人間関係の命式分析（1000字）
+※相談テーマが恋愛以外の場合も、人間関係は人生全体に影響するため必ず鑑定してください。
+・命式から読む「愛し方・愛され方」の特徴
+・どんな相手と縁が深いか（五行・十神の観点から）
+・結婚・パートナーシップにおけるこの人の傾向と課題
+・人間関係全般における「この人のパターン」——なぜ同じことが繰り返されるのか
+・今の大運・流年が人間関係に与える影響
+
+■ 第五章：仕事・才能・お金の命式分析（1000字）
+・命式が示す「天職の方向性」——どんな分野・役割で輝けるか
+・財星（正財・偏財）から読む金運の傾向——稼ぎ方のパターン
+・官星・食傷から読む「社会での立ち位置」
+・現在の大運における仕事運の流れ
+・今後3年以内に仕事・お金の面で起きやすいこと
+
+■ 第六章：10年・20年スパンの運命の流れ（1200字）
+・今後10年の大運の流れを年表形式で詳述
+・人生の「3つの転換期」——いつ、何が変わるのか
+・この命式が最も輝く時期はいつか
+・試練の時期とその乗り越え方
+・50代・60代、晩年の命式はどんな人生を示しているか
+
+■ 第七章：開運のための実践アドバイス（800字）
+命式の用神・喜神に基づいた、具体的で実践的なアドバイスを書いてください。
+・取り入れると良い色・方角・数字・食べ物
+・避けるべき環境・行動パターン
+・この命式の人が運気を上げるために最も効果的な習慣
+・${theme}に関する、今すぐできる具体的なアクション3つ
+
+■ 第八章：あなたへの手紙（800字）
+鑑定書全体を踏まえ、この人の魂に直接語りかける手紙を書いてください。
+・命式を通して見えた「この人の人生の本質的なテーマ」
+・この人が今まさに必要としている言葉
+・この命式を持って生まれてきた「意味」と「使命」
+・未来への希望と覚悟を持って生きるためのメッセージ
+単なる励ましではなく、この命式だからこそ言える、魂に刻まれる言葉を書いてください。
+
+━━━━━━━━━━━━━━━━━━━━
+【絶対に守るルール】
+━━━━━━━━━━━━━━━━━━━━
+・${name}に直接語りかける、温かく誠実な文体を貫く
+・曖昧表現（「〜かもしれません」「〜でしょう」）を最小限に。断言できることは断言する
+・専門用語（干支・五行・十神など）は必ず使い、必ず平易に解説する
+・「よくある占い文」は絶対に書かない。この命式だからこそ言えることだけを書く
+・読んだ人が「自分のことを本当にわかってくれた」と涙が出るほどの深さを目指す
+・合計文字数8000字以上を厳守すること。短くまとめない、省略しない`;
+
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 16000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      if(data.error) throw new Error(data.error.message);
+      const text = data.content?.map(c => c.text || '').join('') || '生成に失敗しました。';
+      resultBox.className = 'result-box';
+      resultBox.textContent = text;
+    } catch(e) {
+      resultBox.className = 'result-box';
+      resultBox.textContent = 'エラー：' + e.message + '\n\nAPIキーを確認してください。';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✨ 鑑定文を生成する';
+  }
+
+  // 手相診断
+  async function generateTesou() {
+    const apiKey = getApiKey();
+    if(!apiKey) return;
+
+    const name = document.getElementById('t-name').value.trim() || 'お客様';
+    const hand = document.getElementById('t-hand').value;
+    const theme = document.getElementById('t-theme').value;
+    const memo = document.getElementById('t-memo').value.trim();
+    const fileInput = document.getElementById('t-file');
+
+    if(!fileInput.files[0]) { alert('手のひらの写真を選択してください'); return; }
+
+    const btn = document.getElementById('t-btn');
+    btn.disabled = true;
+    btn.textContent = '生成中...';
+
+    const resultArea = document.getElementById('t-result-area');
+    const resultBox = document.getElementById('t-result');
+    resultArea.style.display = 'block';
+    resultBox.className = 'result-box loading';
+    resultBox.textContent = '手相を精密に読み取り、本格鑑定書を生成中です。7000字以上の鑑定書を作成しているため、1〜2分かかります。そのままお待ちください...';
+
+    const file = fileInput.files[0];
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = e => res(e.target.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    const prompt = `あなたは手相鑑定を40年以上続け、これまで1万人以上の手を読んできた最高峰の手相占い師です。鑑定料1万円以上をいただく本物のプロとして、添付された${hand}の写真を隅々まで観察し、${name}への人生が変わるほどの本格手相鑑定書を作成してください。文字数は合計7000〜9000字を目標にしてください。
+
+【お客様情報】
+名前：${name}
+診断する手：${hand}
+ご相談テーマ：${theme}
+${memo ? 'お客様の状況・悩み：' + memo : ''}
+
+━━━━━━━━━━━━━━━━━━━━
+【鑑定書の構成】以下8つのセクションを、各700〜1200字で丁寧に書いてください
+━━━━━━━━━━━━━━━━━━━━
+
+■ 第一章：手のひら全体の読み解き（800字）
+写真を隅々まで観察し、以下を詳しく述べてください。
+・手のひらの形（四角形・長方形・扇形など）とその人格的意味
+・手の大きさ・厚みから読む生命エネルギーの質と量
+・肌の質感・色・手全体の印象から読むその人の「気」
+・指の長さ・形・間隔から読める性格・思考スタイル
+・手全体が発しているオーラや第一印象——「この手を持つ人はどんな人間か」
+
+■ 第二章：生命線の精密鑑定（900字）
+生命線を詳細に観察し、以下を丁寧に解説してください。
+・線の長さ・深さ・太さ・色の実際の観察結果
+・線の起点と終点——どこから始まり、どこで終わるか
+・途中の特徴（島・鎖状・二重線・切れ目・支線など）とその意味
+・生命線から読む「体力・健康・生命力」の傾向
+・生命線が示す「人生の活動範囲と行動力」
+・過去の大きな出来事や転機が刻まれているか
+
+■ 第三章：感情線の精密鑑定（900字）
+感情線を詳細に観察し、以下を丁寧に解説してください。
+・線の長さ・深さ・カーブの強さの実際の観察結果
+・感情線の終点が示す「愛し方・愛され方の本質」
+・途中の特徴（枝分かれ・島・鎖状など）とその意味
+・感情線が示す${name}の「感情表現のパターン」
+・恋愛・結婚・人間関係における傾向と課題
+・感情線から見えるトラウマや癒されていない感情
+
+■ 第四章：頭脳線の精密鑑定（900字）
+頭脳線を詳細に観察し、以下を丁寧に解説してください。
+・線の長さ・方向・カーブの観察結果
+・頭脳線の起点——生命線と離れているか、くっついているか、その意味
+・線の特徴（途切れ・島・枝分かれ）とその意味
+・頭脳線が示す「思考スタイル・判断力・創造性」
+・仕事や学習における${name}の強みと弱み
+・頭脳線から読む「この人が最も活躍できる分野」
+
+■ 第五章：運命線・その他の線の精密鑑定（900字）
+・運命線の有無と、ある場合はその長さ・深さ・起点の観察結果
+・運命線が示す「人生の方向性・使命感・社会での役割」
+・太陽線（成功線）の有無と意味
+・結婚線の本数・長さ・特徴と${name}の縁談・結婚運
+・財運線・旅行線・感謝線など、目立つ補助線があれば詳述
+・手相全体の線の「密度」から読む人生の複雑さと豊かさ
+
+■ 第六章：${theme}の徹底鑑定（1200字）
+観察したすべての手相情報を統合し、${theme}について徹底的に鑑定してください。
+・${theme}に最も影響している線・丘・特徴はどれか
+・現在の${name}の状況を手相はどう語っているか
+・直近1〜2年で${theme}において起きやすいこと
+・${theme}における「この手相が持つ最大の強み」
+・${theme}において「今すぐ変えるべきこと」
+${memo ? '・「' + memo + '」という悩みに対して、この手相はどんな答えを示しているか' : ''}
+・手相から見た、${theme}が大きく動くタイミングはいつか
+
+■ 第七章：開運のための実践アドバイス（700字）
+この手相から読み取った情報に基づいた、具体的で実践的なアドバイスを書いてください。
+・この手相の人が運気を上げるために最も大切なこと
+・日常生活で取り入れると良い習慣・行動
+・手相は変わる——${name}がどんな意識を持てば、どの線が育つか
+・${theme}に関して、今すぐできる具体的なアクション3つ
+・手を見るたびに思い出してほしい、一番大切なメッセージ
+
+■ 第八章：あなたの手が語る、人生の物語（800字）
+鑑定書全体を踏まえ、この手相が語る${name}の人生の本質を伝えてください。
+・この手のひらに刻まれた「人生のテーマ」
+・${name}が生まれ持った使命と才能
+・今まさにこの鑑定書を読んでいる${name}に、最も伝えたいこと
+・未来に向けて、この手相を持つ人間として生きていくための言葉
+単なる励ましではなく、この手相だからこそ言える、魂に刻まれる言葉を書いてください。
+
+━━━━━━━━━━━━━━━━━━━━
+【絶対に守るルール】
+━━━━━━━━━━━━━━━━━━━━
+・写真から実際に観察できた特徴を必ず具体的に述べる（「〜のように見えます」は可、「見えません」は不可）
+・見えにくい線も「薄く走っているように見えます」「痕跡のような線が」など最大限読み解く
+・${name}に直接語りかける、温かく誠実な文体を貫く
+・「一般的な手相解説」は絶対に書かない。この手相だからこそ言えることだけを書く
+・読んだ人が「自分の手をこんなに深く見てもらったのは初めて」と感動するリアリティを
+・合計文字数7000字以上を厳守すること。短くまとめない、省略しない`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 16000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: file.type || 'image/jpeg', data: base64 } },
+              { type: 'text', text: prompt }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      if(data.error) throw new Error(data.error.message);
+      const text = data.content?.map(c => c.text || '').join('') || '生成に失敗しました。';
+      resultBox.className = 'result-box';
+      resultBox.textContent = text;
+    } catch(e) {
+      resultBox.className = 'result-box';
+      resultBox.textContent = 'エラー：' + e.message + '\n\nAPIキーを確認してください。';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✨ 診断文を生成する';
+  }
+
+  // コピー
+  function copyResult(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('コピーしました！');
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('コピーしました！');
+    });
+  }
+</script>
+</body>
+</html>
