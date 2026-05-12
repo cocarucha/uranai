@@ -7,220 +7,253 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── カラー変数 ── */
+  :root {
+    --bg:        #FDF6F0;        /* 温かみのあるオフホワイト */
+    --bg2:       #FFF0F3;        /* 薄ピンク（カード背景） */
+    --border:    #E8C8C8;        /* ローズベージュ（ボーダー） */
+    --gold:      #B8860B;        /* アンティークゴールド */
+    --gold-lt:   #D4A84B;        /* 明るいゴールド */
+    --rose:      #C06080;        /* ローズ（見出し） */
+    --rose-lt:   #E8A0B0;        /* 薄ローズ（アクセント） */
+    --text:      #3D1C2E;        /* 深ワイン（本文） */
+    --text2:     #7A5060;        /* ミッドトーン（サブテキスト） */
+    --text3:     #A07080;        /* 薄め（ラベル） */
+    --input-bg:  #FFFAF8;        /* 入力欄背景 */
+    --btn:       #C06080;        /* ボタン */
+    --btn-text:  #FFFFFF;
+  }
+
   body {
     font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Georgia', serif;
-    background: #0d0a1a;
-    color: #e8dff5;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.7;
   }
 
   header {
     text-align: center;
-    padding: 2.5rem 1rem 1.5rem;
-    border-bottom: 1px solid rgba(180,140,255,0.15);
-    background: linear-gradient(180deg, rgba(80,40,120,0.3) 0%, transparent 100%);
+    padding: 2rem 1rem 1.5rem;
+    border-bottom: 2px solid var(--border);
+    background: linear-gradient(180deg, #FDE8EE 0%, var(--bg) 100%);
   }
-  header h1 { font-size: 1.8rem; font-weight: 400; letter-spacing: 0.12em; color: #d4b8ff; }
-  header p { font-size: 0.8rem; color: rgba(180,150,220,0.6); margin-top: 6px; letter-spacing: 0.1em; }
+  header h1 { font-size: 1.6rem; font-weight: 400; letter-spacing: 0.12em; color: var(--rose); }
+  header p { font-size: 0.82rem; color: var(--text3); margin-top: 6px; letter-spacing: 0.08em; }
 
   .container { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
 
-  /* APIキー設定 */
+  /* ── APIキー（折りたたみ式） ── */
+  .api-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text3);
+    margin-bottom: 1.5rem;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg2);
+    width: fit-content;
+    user-select: none;
+  }
+  .api-toggle:hover { color: var(--rose); border-color: var(--rose-lt); }
+  .api-toggle-icon { font-size: 0.75rem; transition: transform 0.2s; }
+  .api-toggle-icon.open { transform: rotate(90deg); }
+
   .api-section {
-    background: rgba(40,20,70,0.6);
-    border: 1px solid rgba(180,140,255,0.2);
+    background: var(--bg2);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 1.2rem 1.4rem;
     margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: none;
     flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
   }
-  .api-section label { font-size: 0.8rem; color: rgba(180,150,220,0.8); white-space: nowrap; letter-spacing: 0.05em; }
+  .api-section.visible { display: flex; }
+  .api-section label { font-size: 0.82rem; color: var(--text2); white-space: nowrap; }
   .api-section input {
-    flex: 1;
-    min-width: 200px;
-    background: rgba(20,10,40,0.8);
-    border: 1px solid rgba(180,140,255,0.25);
+    flex: 1; min-width: 200px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 9px 12px;
-    color: #c8a8ff;
+    color: var(--text);
     font-family: monospace;
     font-size: 0.85rem;
     outline: none;
   }
-  .api-section input:focus { border-color: rgba(180,140,255,0.6); }
+  .api-section input:focus { border-color: var(--rose-lt); }
   .api-save-btn {
     padding: 9px 18px;
-    background: rgba(100,60,180,0.5);
-    border: 1px solid rgba(180,140,255,0.4);
+    background: var(--gold);
+    border: none;
     border-radius: 8px;
-    color: #d4b8ff;
+    color: #fff;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: background 0.2s;
+    transition: opacity 0.2s;
   }
-  .api-save-btn:hover { background: rgba(120,70,200,0.6); }
-  .api-status { font-size: 0.75rem; width: 100%; color: rgba(150,220,150,0.8); display: none; }
+  .api-save-btn:hover { opacity: 0.85; }
+  .api-status { font-size: 0.75rem; width: 100%; color: #4CAF50; display: none; }
 
-  /* タブ */
+  /* ── タブ ── */
   .tabs {
     display: flex;
-    gap: 0;
     margin-bottom: 1.5rem;
-    border: 1px solid rgba(180,140,255,0.2);
+    border: 1.5px solid var(--border);
     border-radius: 10px;
     overflow: hidden;
   }
   .tab {
     flex: 1;
-    padding: 13px;
+    padding: 13px 6px;
     text-align: center;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    background: rgba(20,10,40,0.6);
-    color: rgba(180,150,220,0.6);
+    background: var(--bg2);
+    color: var(--text3);
     border: none;
     font-family: inherit;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     transition: all 0.2s;
   }
-  .tab.active {
-    background: rgba(80,40,140,0.7);
-    color: #d4b8ff;
-  }
-  .tab:not(:last-child) { border-right: 1px solid rgba(180,140,255,0.2); }
-  .tab { font-size: 0.82rem; padding: 12px 6px; }
+  .tab.active { background: var(--rose); color: #fff; font-weight: 500; }
+  .tab:not(:last-child) { border-right: 1.5px solid var(--border); }
 
-  /* パネル */
+  /* ── パネル ── */
   .panel { display: none; }
   .panel.active { display: block; }
 
-  /* フォームカード */
+  /* ── カード ── */
   .card {
-    background: rgba(25,12,50,0.7);
-    border: 1px solid rgba(180,140,255,0.15);
+    background: var(--bg2);
+    border: 1.5px solid var(--border);
     border-radius: 14px;
     padding: 1.5rem;
     margin-bottom: 1rem;
   }
 
   .section-title {
-    font-size: 0.72rem;
-    letter-spacing: 0.15em;
-    color: rgba(180,140,255,0.5);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
     text-transform: uppercase;
     margin-bottom: 1rem;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(180,140,255,0.1);
+    border-bottom: 1px solid var(--border);
   }
 
   label.lbl {
     display: block;
-    font-size: 0.78rem;
-    color: rgba(180,150,220,0.7);
+    font-size: 0.85rem;
+    color: var(--text2);
     margin-bottom: 5px;
-    letter-spacing: 0.05em;
+    font-weight: 500;
   }
 
   input[type="text"], input[type="date"], input[type="time"], select, textarea {
     width: 100%;
-    background: rgba(15,8,35,0.8);
-    border: 1px solid rgba(180,140,255,0.2);
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
     border-radius: 8px;
-    padding: 10px 13px;
-    color: #e0d0ff;
+    padding: 11px 14px;
+    color: var(--text);
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-bottom: 1rem;
     outline: none;
     transition: border-color 0.2s;
   }
-  input:focus, select:focus, textarea:focus { border-color: rgba(180,140,255,0.5); }
-  select option { background: #1a0a40; }
-  textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  input:focus, select:focus, textarea:focus { border-color: var(--rose-lt); }
+  select option { background: #fff; color: var(--text); }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.7; }
 
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media(max-width:480px) { .row { grid-template-columns: 1fr; } }
 
-  /* 生成ボタン */
+  /* ── 生成ボタン ── */
   .gen-btn {
     width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, rgba(100,50,180,0.8), rgba(140,60,200,0.8));
-    border: 1px solid rgba(200,150,255,0.4);
+    padding: 15px;
+    background: linear-gradient(135deg, var(--rose), #A04060);
+    border: none;
     border-radius: 10px;
-    color: #f0e0ff;
+    color: #fff;
     font-family: inherit;
-    font-size: 1rem;
-    letter-spacing: 0.1em;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
     cursor: pointer;
     transition: opacity 0.2s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(192,96,128,0.3);
   }
   .gen-btn:hover { opacity: 0.9; }
   .gen-btn:active { transform: scale(0.99); }
-  .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 
-  /* 画像アップロード */
+  /* ── 画像アップロード ── */
   .upload-zone {
-    border: 1px dashed rgba(180,140,255,0.3);
+    border: 2px dashed var(--rose-lt);
     border-radius: 10px;
     padding: 1.8rem 1rem;
     text-align: center;
     cursor: pointer;
     margin-bottom: 1rem;
     transition: background 0.2s;
+    background: #FFF8F8;
   }
-  .upload-zone:hover { background: rgba(100,60,160,0.1); }
+  .upload-zone:hover { background: #FFE8EE; }
   .upload-zone .icon { font-size: 2rem; margin-bottom: 8px; }
-  .upload-zone p { font-size: 0.82rem; color: rgba(180,150,220,0.6); line-height: 1.6; }
+  .upload-zone p { font-size: 0.85rem; color: var(--text3); line-height: 1.6; }
   input[type="file"] { display: none; }
   .preview-img {
     width: 100%;
     max-height: 220px;
     object-fit: contain;
     border-radius: 8px;
-    border: 1px solid rgba(180,140,255,0.2);
+    border: 1.5px solid var(--border);
     margin-bottom: 1rem;
   }
 
-  /* 結果 */
+  /* ── 結果 ── */
   .result-area { margin-top: 1rem; }
   .result-box {
-    background: rgba(15,8,35,0.9);
-    border: 1px solid rgba(180,140,255,0.2);
+    background: #FFFAF8;
+    border: 1.5px solid var(--border);
     border-radius: 12px;
-    padding: 1.4rem;
-    font-size: 0.9rem;
+    padding: 1.5rem;
+    font-size: 1rem;
     line-height: 2;
-    color: #ddd0f5;
+    color: var(--text);
     white-space: pre-wrap;
     min-height: 100px;
   }
-  .result-box.loading { color: rgba(180,150,220,0.5); font-style: italic; }
+  .result-box.loading { color: var(--text3); font-style: italic; }
 
   .copy-btn {
     width: 100%;
     margin-top: 10px;
-    padding: 10px;
+    padding: 11px;
     background: transparent;
-    border: 1px solid rgba(180,140,255,0.25);
+    border: 1.5px solid var(--border);
     border-radius: 8px;
-    color: rgba(180,150,220,0.7);
+    color: var(--text2);
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    letter-spacing: 0.05em;
     transition: background 0.2s;
   }
-  .copy-btn:hover { background: rgba(100,60,160,0.15); }
+  .copy-btn:hover { background: var(--bg2); }
 
   .notice {
-    font-size: 0.72rem;
-    color: rgba(150,130,180,0.5);
+    font-size: 0.78rem;
+    color: var(--text3);
     text-align: center;
     margin-top: 10px;
     line-height: 1.7;
@@ -230,27 +263,27 @@
     width: 100%;
     margin-top: 8px;
     padding: 11px;
-    background: linear-gradient(135deg, rgba(180,120,40,0.4), rgba(200,160,60,0.4));
-    border: 1px solid rgba(210,170,80,0.5);
+    background: linear-gradient(135deg, #C8921A, var(--gold-lt));
+    border: none;
     border-radius: 8px;
-    color: #f0d080;
+    color: #fff;
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    letter-spacing: 0.05em;
     transition: opacity 0.2s;
+    box-shadow: 0 2px 6px rgba(180,130,20,0.25);
   }
-  .pdf-btn:hover { opacity: 0.85; }
+  .pdf-btn:hover { opacity: 0.88; }
 
   @media print {
-    body { background: #fff !important; color: #1a0a35 !important; }
-    header, .api-section, .tabs, .card, .copy-btn, .pdf-btn, .notice { display: none !important; }
+    body { background: #fff !important; color: #3D1C2E !important; }
+    header, .api-toggle, .api-section, .tabs, .card, .copy-btn, .pdf-btn, .notice { display: none !important; }
     .result-area { display: block !important; }
     .print-header { display: block !important; }
     .result-box {
       background: #fff !important;
       border: none !important;
-      color: #1a0a35 !important;
+      color: #3D1C2E !important;
       font-size: 11pt !important;
       line-height: 2.2 !important;
       white-space: pre-wrap;
@@ -263,10 +296,10 @@
     display: none;
     text-align: center;
     padding: 20px 0 12px;
-    border-bottom: 2px solid #c9a84c;
+    border-bottom: 2px solid var(--gold);
     margin-bottom: 20px;
   }
-  .print-header h1 { font-size: 22pt; color: #1a0a35; letter-spacing: 0.1em; font-family: 'Hiragino Mincho ProN','Yu Mincho',serif; }
+  .print-header h1 { font-size: 22pt; color: var(--rose); letter-spacing: 0.1em; font-family: 'Hiragino Mincho ProN','Yu Mincho',serif; }
   .print-header p { font-size: 10pt; color: #555; margin-top: 6px; }
 </style>
 </head>
@@ -279,8 +312,12 @@
 
 <div class="container">
 
-  <!-- APIキー設定 -->
-  <div class="api-section">
+  <!-- APIキー設定（折りたたみ式） -->
+  <div class="api-toggle" onclick="toggleApi()" id="api-toggle-btn">
+    <span>⚙️ APIキー設定</span>
+    <span class="api-toggle-icon" id="api-toggle-icon">▶</span>
+  </div>
+  <div class="api-section" id="api-section">
     <label>Anthropic APIキー</label>
     <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off">
     <button class="api-save-btn" onclick="saveApiKey()">保存</button>
@@ -519,12 +556,28 @@
 </div>
 
 <script>
+  // APIキー折りたたみ
+  function toggleApi() {
+    const section = document.getElementById('api-section');
+    const icon = document.getElementById('api-toggle-icon');
+    const isOpen = section.classList.contains('visible');
+    section.classList.toggle('visible', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+
   // APIキー管理
   window.onload = function() {
     const saved = localStorage.getItem('uranai_api_key');
     if(saved) {
       document.getElementById('api-key').value = saved;
-      document.getElementById('api-status').style.display = 'block';
+      // 保存済みなら折りたたんだまま・ステータスだけ表示
+      const status = document.getElementById('api-status');
+      status.style.display = 'block';
+      status.textContent = '✓ APIキーは保存済みです';
+    } else {
+      // 未保存なら自動で開く
+      document.getElementById('api-section').classList.add('visible');
+      document.getElementById('api-toggle-icon').classList.add('open');
     }
   };
 
