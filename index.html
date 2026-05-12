@@ -561,10 +561,10 @@
 
   function saveToSheet(type, name, birth, theme, result) {
     try {
-      const payload = JSON.stringify({ type, name, birth, theme, result });
-      // URLパラメータとして送信（CORS制限を完全回避）
-      const url = GAS_URL + '?payload=' + encodeURIComponent(payload);
-      fetch(url, { method: 'GET', mode: 'no-cors' });
+      const payload = encodeURIComponent(JSON.stringify({ type, name, birth, theme, result }));
+      // Imageタグ経由で送信（CORS完全回避・どんな環境でも動く）
+      const img = new Image();
+      img.src = GAS_URL + '?payload=' + payload;
       console.log('スプレッドシートに送信しました');
     } catch(e) {
       console.warn('保存エラー:', e.message);
