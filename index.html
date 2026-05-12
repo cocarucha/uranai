@@ -800,6 +800,13 @@ ${memo ? 'お客様の状況・悩み：' + memo : ''}
       // スプレッドシートに自動保存
       const birthVal = document.getElementById('s-birth').value;
       saveToSheet('四柱推命', name, birthVal, theme, text);
+    } catch(e) {
+      resultBox.className = 'result-box';
+      resultBox.textContent = 'エラー：' + e.message + '\n\nAPIキーを確認してください。';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✨ 鑑定文を生成する';
   }
 
   // 手相診断
