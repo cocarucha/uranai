@@ -142,8 +142,12 @@ input[type="file"] { display:none; }
 
     <div class="card">
       <div class="section-title">お客様の基本情報</div>
-      <label class="lbl">お名前</label>
-      <input type="text" id="s-name" placeholder="例：さくらさん">
+      <label class="lbl">お名前（フルネーム推奨）</label>
+      <div class="row">
+        <div><label class="lbl" style="font-size:.75rem">姓（苗字）</label><input type="text" id="s-sei" placeholder="例：田中" oninput="updateSeiMei('s')"></div>
+        <div><label class="lbl" style="font-size:.75rem">名（名前）</label><input type="text" id="s-mei" placeholder="例：美樹" oninput="updateSeiMei('s')"></div>
+      </div>
+      <input type="hidden" id="s-name" value="">
       <div class="row">
         <div>
           <label class="lbl">生年月日</label>
@@ -735,9 +739,21 @@ async function generateShichu(){
   const m=calcMeshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),time?parseInt(time.split(':')[0]):null);
   showMeshiki('s',m);
 
+  // 姓名判断計算
+  const sei = document.getElementById('s-sei')?.value.trim()||'';
+  const mei = document.getElementById('s-mei')?.value.trim()||'';
+  let seimeiStr = '';
+  if(sei && mei){
+    const g = calcGogaku(sei, mei);
+    if(g) seimeiStr = `\n【姓名判断（熊崎式五格）】\n` +
+      `天格：${g.tenkaku.n}画（${g.tenkaku.kk}）　人格：${g.jinkaku.n}画（${g.jinkaku.kk}）　地格：${g.chikaku.n}画（${g.chikaku.kk}）\n` +
+      `外格：${g.gaikaku.n}画（${g.gaikaku.kk}）　総格：${g.sougaku.n}画（${g.sougaku.kk}）`;
+  }
+
   const meshikiStr=`年柱：${m.nen.kanji}（${m.nen.read}）／月柱：${m.tsuki.kanji}（${m.tsuki.read}）／日柱：${m.nichi.kanji}（${m.nichi.read}）／時柱：${m.ji.kanji}（${m.ji.read}）`;
   const gokyoStr=Object.entries(m.bal).map(([k,v])=>`${k}${v}`).join(' ');
 
+  const fullName = sei && mei ? sei+' '+mei : name;
   const prompt=`あなたは四柱推命を40年以上研究してきた最高峰の占い師です。以下のお客様に本格鑑定書を書いてください（8000〜10000字）。
 
 【お客様情報】
@@ -754,6 +770,9 @@ ${meshikiStr}
 五行バランス：${gokyoStr}
 日主：${m.nichi.kanji[0]}（${m.nichi.read}）／${m.yj.強弱}／用神：${m.yj.用神}
 十神：年干=${m.js['年干']}・月干=${m.js['月干']}・時干=${m.js['時干']}
+
+${seimeiStr}
+${seimeiStr?'⚠️ 姓名判断の五格も上記の通りです。勝手に変えないでください。':''}
 
 ⚠️ 命式は上記の通り固定です。鑑定文中で必ずこの通りに記載してください。
 
@@ -903,6 +922,7 @@ async function generateAisho(){
   const mStr=(m)=>`年${m.nen.kanji}・月${m.tsuki.kanji}・日${m.nichi.kanji}・時${m.ji.kanji}／五行：${Object.entries(m.bal).map(([k,v])=>k+v).join(' ')}／日主：${m.nichi.kanji[0]}（${m.yj.強弱}）`;
   const today=new Date();
 
+  const fullName = sei && mei ? sei+' '+mei : name;
   const prompt=`あなたは四柱推命を40年以上研究してきた最高峰の占い師です。二人の命式を精密に読み解き本格相性鑑定書を作成してください（6000〜8000字）。
 
 【確定命式（計算済み・絶対変更不可）】
