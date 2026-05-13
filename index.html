@@ -561,10 +561,14 @@
 
   function saveToSheet(type, name, birth, theme, result) {
     try {
-      const payload = encodeURIComponent(JSON.stringify({ type, name, birth, theme, result }));
-      // Imageタグ経由で送信（CORS完全回避・どんな環境でも動く）
-      const img = new Image();
-      img.src = GAS_URL + '?payload=' + payload;
+      // scriptタグ動的挿入方式（CORSを完全回避・どんな環境でも動く）
+      const data = { type, name, birth, theme, result };
+      const url = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(data));
+      const script = document.createElement('script');
+      script.src = url;
+      script.onload = () => { document.body.removeChild(script); };
+      script.onerror = () => { document.body.removeChild(script); };
+      document.body.appendChild(script);
       console.log('スプレッドシートに送信しました');
     } catch(e) {
       console.warn('保存エラー:', e.message);
