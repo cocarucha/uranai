@@ -653,11 +653,29 @@ function previewImg2(e){
 const GAS_URL='https://script.google.com/macros/s/AKfycbyLNAjtrdrzfJqZyfbsTwOWANswwEADiRhoq0wttFhjO7rLN-bjKltav0fTYoQcA7Pyyw/exec';
 function saveToSheet(type,name,birth,theme,result){
   try{
-    const s=document.createElement('script');
-    s.src=GAS_URL+'?payload='+encodeURIComponent(JSON.stringify({type,name,birth,theme,result}));
-    s.onload=()=>document.body.removeChild(s);
-    s.onerror=()=>document.body.removeChild(s);
-    document.body.appendChild(s);
+    // 非表示iframeにフォームをPOST送信（CORS完全回避）
+    let iframe=document.getElementById('_gas_iframe');
+    if(!iframe){
+      iframe=document.createElement('iframe');
+      iframe.id='_gas_iframe';
+      iframe.name='_gas_iframe';
+      iframe.style.cssText='display:none;width:0;height:0;border:0;';
+      document.body.appendChild(iframe);
+    }
+    const form=document.createElement('form');
+    form.method='POST';
+    form.action=GAS_URL;
+    form.target='_gas_iframe';
+    form.style.display='none';
+    const field=document.createElement('input');
+    field.type='hidden';
+    field.name='payload';
+    field.value=JSON.stringify({type,name,birth,theme,result});
+    form.appendChild(field);
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(()=>{if(form.parentNode)document.body.removeChild(form);},3000);
+    console.log('スプレッドシートに送信しました');
   }catch(e){console.warn('保存エラー:',e);}
 }
 
