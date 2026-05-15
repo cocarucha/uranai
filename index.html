@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔮 月乃つむぎ占い</title>
+<title>🔮 占い師ツール</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -88,8 +88,8 @@ input[type=file]{display:none;}
 </head>
 <body>
 <header>
-  <h1>🔮 占い師ツール</h1>
-  <p>四柱推命・手相診断・相性占い 鑑定書ジェネレーター</p>
+  <h1>🔮 月乃紬希</h1>
+  <p>四柱推命・手相・相性・数秘術・九星気学・タロット 鑑定書ジェネレーター</p>
 </header>
 <div class="wrap">
 
@@ -436,9 +436,13 @@ input[type=file]{display:none;}
     </div>
     <input type="hidden" id="cal-name">
     <div class="row">
-      <div><label class="L">生年月日（任意）</label><input type="date" id="cal-birth"></div>
-      <div><label class="L">表示する月</label><input type="month" id="cal-month"></div>
+      <div><label class="L">生年月日（必須）</label><input type="date" id="cal-birth" required></div>
+      <div><label class="L">性別</label>
+        <select id="cal-gender"><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option></select>
+      </div>
     </div>
+    <label class="L">表示する月</label>
+    <input type="month" id="cal-month">
     <label class="L">用途・目的</label>
     <select id="cal-purpose">
       <option value="全般">全般（総合的な吉日）</option>
@@ -1164,9 +1168,18 @@ function drawCards(){
   const box = document.getElementById('tar-cards-box');
   const cardsEl = document.getElementById('tar-cards');
   const labels = count===1?['答え']:count===3?['過去','現在','未来']:['現状','課題','過去','未来','結果'];
-  cardsEl.innerHTML = drawnCards.map((c,i)=>
-    `<span class="tag g" style="display:block;width:100%;margin-bottom:4px;">${labels[i]||''}：${c.n} ${c.reversed?'【逆位置】':'【正位置】'}<br><span style="font-size:.72rem;color:var(--text3)">${c.reversed?c.r:c.u}</span></span>`
-  ).join('');
+  cardsEl.innerHTML = drawnCards.map((card,i)=>{
+    const pos=card.reversed?'逆位置':'正位置';
+    const meaning=card.reversed?card.r:card.u;
+    const bg=card.reversed?'#fce4ec':'#e8f5e9';
+    const bd=card.reversed?'#e8a0b0':'#a0c8a0';
+    const lbl=labels[i]||('カード'+(i+1));
+    return '<div style="background:'+bg+';border:1.5px solid '+bd+';border-radius:10px;padding:12px;margin-bottom:10px;">'
+      +'<div style="font-size:.75rem;color:var(--text3);margin-bottom:4px;">'+lbl+'</div>'
+      +'<div style="font-size:1.1rem;font-weight:600;color:var(--rose);margin-bottom:4px;">'+card.n+' 【'+pos+'】</div>'
+      +'<div style="font-size:.85rem;color:var(--text2);">'+meaning+'</div>'
+      +'</div>';
+  }).join('');
   box.style.display='block';
   document.getElementById('tar-btn').disabled=false;
 }
@@ -1181,20 +1194,46 @@ function getKanshi(y,m,d){
   return KAN[k]+SHI[s];
 }
 
-function calcKaiun(year, month){
+function calcKaiun(year, month, nichi_k, youjin_str){
+  // youjin_str: "土・金" など
+  const youjin = youjin_str ? youjin_str.replace('バランス維持','').split(/[・\/]/).map(s=>s.trim()).filter(Boolean) : [];
+  const GOKYO_KAN={'木':[0,1],'火':[2,3],'土':[4,5],'金':[6,7],'水':[8,9]};
+  const GOKYO_SHI={'木':[2,3],'火':[5,6],'土':[1,4,7,10],'金':[8,9],'水':[0,11]};
+  const SUPPORT={'木':['水','木'],'火':['木','火'],'土':['火','土'],'金':['土','金'],'水':['金','水']};
+  const nichiGokyo = nichi_k>=0 ? GK[nichi_k] : null;
+  const supportGk = nichiGokyo ? (SUPPORT[nichiGokyo]||[]) : [];
+
   const results=[];
   const days=new Date(year,month,0).getDate();
   for(let d=1;d<=days;d++){
     const ks=getKanshi(year,month,d);
-    const tags=[];
-    if(TENSYA.includes(ks))tags.push('天赦日');
-    const shiIdx=SHI.indexOf(ks[1]);
-    if(ICHIRYU_SHI.includes(shiIdx))tags.push('一粒万倍日');
-    // 大明日（12種の吉凶）簡易版
-    const kanIdx=KAN.indexOf(ks[0]);
-    if([0,2,4,6,8].includes(kanIdx)&&[0,2,4,6,8,10].includes(shiIdx))tags.push('大明日');
-    if(tags.length>0)results.push({d,ks,tags});
+    const nk=KAN.indexOf(ks[0]), ns=SHI.indexOf(ks[1]);
+    const tags=[], priority_score=[];
+
+    // ── 共通吉日 ──
+    if(TENSYA.includes(ks)){tags.push('🌟天赦日');priority_score.push(4);}
+    if(ICHIRYU_SHI.includes(ns)){tags.push('🌱一粒万倍日');priority_score.push(2);}
+    if([0,2,4,6,8].includes(nk)&&[0,2,4,6,8,10].includes(ns)){tags.push('☀️大明日');priority_score.push(1);}
+
+    // ── 個人吉日（用神の五行と一致する日）──
+    if(youjin.length>0){
+      for(const yg of youjin){
+        if(GOKYO_KAN[yg]&&GOKYO_KAN[yg].includes(nk)){tags.push('✨用神吉日(干:'+yg+')');priority_score.push(3);}
+        if(GOKYO_SHI[yg]&&GOKYO_SHI[yg].includes(ns)){tags.push('✨用神吉日(支:'+yg+')');priority_score.push(3);}
+      }
+    }
+
+    // ── 日主強化日 ──
+    if(nichiGokyo&&(supportGk.includes(GK[nk])||supportGk.includes(GS[ns]))){
+      tags.push('💎日主強化日');priority_score.push(2);
+    }
+
+    if(tags.length>0){
+      const priority=priority_score.reduce((a,b)=>a+b,0);
+      results.push({d,ks,tags,priority});
+    }
   }
+  results.sort((a,b)=>b.priority-a.priority);
   return results;
 }
 
@@ -1413,43 +1452,57 @@ async function genTarot(){
   const cardsStr=drawnCards.map((c,i)=>{const pos=c.reversed?'【逆位置】（'+c.r+'）':'【正位置】（'+c.u+'）';return labels[i]+'：'+c.n+' '+pos;}).join('\n');
 
 
-  const prompt=`あなたはタロット鑑定40年の最高峰のタロット占い師です。以下の引いたカードを使い、${name}への本格タロット鑑定書を書いてください（4000〜6000字）。
+  const spreadType=spread.includes('1枚')?'ワンオラクル':spread.includes('3枚')?'スリーカード':'ケルト十字';
+  const prompt=`あなたはタロット鑑定40年の最高峰の占い師です。以下の引いたカードを使い、${name}への本格タロット鑑定書を書いてください（6000〜8000字）。
 
 【今日の確定日付】${td.str}
 
 【お客様情報】
-名前：${name}　テーマ：${theme}
+名前：${name}　テーマ：${theme}　展開法：${spreadType}
 ${memo?'質問・状況：'+memo:''}
 ${seimeiStr_}
-
-【展開法】${spread}
 
 【引いたカード（確定・変更禁止）】
 ${cardsStr}
 
-⚠️ 上記のカードは実際に引いたものです。カードを変更したり、引いていないカードを追加しないこと。
+⚠️ 上記カードは実際に引いたものです。絶対に変更・追加しないこと。
 
 【鑑定書の構成】
 
-## 第一章：カードの全体的な読み
-引いたカード全体が語るメッセージ・現在の状況の本質
+## 第一章：カード配置の全体像
+引いたカード全体が作り出すエネルギーの流れ。カード同士の関係性・対話・補完・矛盾を読み解く。${name}の現在の状況の本質を一言で表すとすれば何か。
 
-## 第二章：各カードの詳細解釈
-各カードの意味・今の${name}の状況への具体的な当てはめ
+## 第二章：各カードの精密解釈
+各カードについて以下を詳述：
+- カードの基本的な意味（正位置/逆位置）
+- このカードが引かれた理由・必然性
+- 今の${name}の状況への具体的な当てはめ
+- このカードが${name}に伝えようとしているメッセージ
+${spread.includes('3枚')?'（過去カード：何が土台にあるか / 現在カード：今まさに起きていること / 未来カード：この流れが続けば何が訪れるか）':''}
 
-## 第三章：${theme}への答え
-${memo?'「'+memo+'」という質問への':''}タロットからの具体的な答えと導き
+## 第三章：${theme}への直接の答え
+${memo?'「'+memo+'」という質問に対して、':'' }タロットが示す明確な答え。
+- YES/NOではなく「どういう条件で・どう動けば」という形で
+- カードが示す最良のシナリオと最悪のシナリオ
+- 今がチャンスなのか待ち時間なのか、タロットはどう語っているか
 
-## 第四章：近い未来の展開
-カードが示す今後3ヶ月〜半年の流れ・注意すべきこと
+## 第四章：潜在意識と隠れたメッセージ
+タロットは意識の奥を映す鏡。${name}自身が気づいていない本音・恐れ・本当の望みをカードから読み解く。
 
-## 第五章：アドバイスと行動指針
-カードが示す「すべきこと」「避けるべきこと」・今すぐできるアクション
+## 第五章：今後3ヶ月〜6ヶ月の展開
+カードが示す近い未来のストーリー。時期ごとの変化・転換点・重要な決断の瞬間。
 
-## 第六章：${name}へのメッセージ
-タロットが${name}に伝えたい最も大切なメッセージ
+## 第六章：行動指針とアドバイス
+カードが具体的に示す「今すぐすべきこと」「やめるべきこと」「大切にすべき価値観」。抽象的ではなく、明日からできる具体的な3つのアクション。
 
-【ルール】${name}に直接語りかける文体・4000字以上厳守・引いたカード以外使用禁止`;
+## 第七章：${name}への手紙
+このカード配置全体が${name}に伝えたい、最も大切な魂のメッセージ。タロットカードを通して宇宙が${name}に送る言葉。
+
+【絶対ルール】
+・引いたカード以外は使用禁止
+・${name}に直接語りかける温かく誠実な文体
+・抽象論ではなく${name}の状況に即した具体的な内容
+・6000字以上厳守`;
 
   try{const txt=await callAPI([{role:'user',content:prompt}]);rb.className='rbox';rb.textContent=txt;saveGAS('タロット',name,'',theme,txt);}
   catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
@@ -1461,42 +1514,42 @@ async function genCalendar(){
   const k=getKey();if(!k)return;
   const sei_=document.getElementById('cal-sei')?.value.trim()||'';
   const mei_=document.getElementById('cal-mei')?.value.trim()||'';
-  const name=(sei_+mei_)||document.getElementById('cal-name')?.value.trim()||'お客様';
-  // 姓名判断計算
+  const name=(sei_+mei_)||'お客様';
   const sg_=sei_&&mei_?calcSeimei(sei_,mei_):null;
   if(sg_){
     const cm={'大吉':'ok','吉':'warn','凶':'ng'};
     const stags=document.getElementById('cal-stags');
     const sbox=document.getElementById('cal-sbox');
-    if(stags)stags.innerHTML=Object.entries({'天格':sg_['天格'],'人格':sg_['人格'],'地格':sg_['地格'],'外格':sg_['外格'],'総格':sg_['総格']}).map(([k,v])=>'<span class="tag '+(cm[v.kk]||'')+'" >'+k+'：'+v.n+'画（'+v.kk+'）</span>').join('');
+    if(stags)stags.innerHTML=Object.entries({'天格':sg_['天格'],'人格':sg_['人格'],'地格':sg_['地格'],'外格':sg_['外格'],'総格':sg_['総格']}).map(([k2,v])=>'<span class="tag '+(cm[v.kk]||'')+'" >'+k2+'：'+v.n+'画（'+v.kk+'）</span>').join('');
     if(sbox)sbox.style.display='block';
   }
-  const seimeiStr_=sg_?'\n【姓名判断（熊崎式五格）】天格'+sg_['天格'].n+'画('+sg_['天格'].kk+')・人格'+sg_['人格'].n+'画('+sg_['人格'].kk+')・地格'+sg_['地格'].n+'画('+sg_['地格'].kk+')・外格'+sg_['外格'].n+'画('+sg_['外格'].kk+')・総格'+sg_['総格'].n+'画('+sg_['総格'].kk+')'+(sg_.unk.length?'　⚠️未登録:'+sg_.unk.join(''):''):'';
+  const seimeiStr_=sg_?'\n【姓名判断】天格'+sg_['天格'].n+'画('+sg_['天格'].kk+')・人格'+sg_['人格'].n+'画('+sg_['人格'].kk+')・総格'+sg_['総格'].n+'画('+sg_['総格'].kk+')':'';
+
   const birth=document.getElementById('cal-birth').value;
   const monthVal=document.getElementById('cal-month').value;
   const purpose=document.getElementById('cal-purpose').value;
   if(!monthVal){alert('表示する月を選択してください');return;}
+  if(!birth){alert('生年月日を入力してください（個人の吉日計算に必要です）');return;}
 
   const [y,m]=monthVal.split('-').map(Number);
-  const kaiun=calcKaiun(y,m);
+  const dBirth=new Date(birth);
+  const genderCal=document.getElementById('cal-gender')?.value||'女性';
+  const m2=meshiki(dBirth.getFullYear(),dBirth.getMonth()+1,dBirth.getDate(),null,genderCal);
+
+  // 個人の命式に基づく吉日計算
+  const kaiun=calcKaiun(y,m,m2.nichi.k,m2.yj.yj);
 
   const btn=document.getElementById('cal-btn');btn.disabled=true;btn.textContent='計算中...';
   document.getElementById('cal-ra').style.display='block';
-  const rb=document.getElementById('cal-r');rb.className='rbox loading';rb.textContent='開運日を計算中...';
+  const rb=document.getElementById('cal-r');rb.className='rbox loading';
+  rb.textContent=name+'さんの個人吉日を計算中...';
 
-  // 命式も計算（生年月日がある場合）
-  let meshikiStr='';
-  if(birth){
-    const d=new Date(birth);
-    const m2=meshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),null,'女性');
-    meshikiStr=`
-日主：${m2.nichi.kanji[0]}　用神：${m2.yj.yj}　現在の大運：${m2.curD.kanji}`;
-  }
-
-  const kaiuStr=kaiun.map(r=>r.d+'日('+r.ks+')：'+r.tags.join('・')).map(r=>y+'年'+m+'月'+r).join('\n');
+  const meshikiStr='命式：年'+m2.nen.kanji+'・月'+m2.tsuki.kanji+'・日'+m2.nichi.kanji+'\n日主：'+m2.nichi.kanji[0]+'（'+m2.yj.kj+'）　用神：'+m2.yj.yj+'　大運：'+m2.curD.kanji;
+  const topKaiun=kaiun.slice(0,12);
+  const kaiuStr=topKaiun.map(r=>y+'年'+m+'月'+r.d+'日('+r.ks+')：'+r.tags.join('・')).join('\n');
   const td=today();
 
-  const prompt=`あなたは四柱推命・暦学の最高峰の鑑定士です。${name}の${y}年${m}月（${wr(y)}${m}月）の開運日カレンダーを作成してください。
+  const prompt=`あなたは四柱推命40年の最高峰の占い師です。${name}の${y}年${m}月（${wr(y)}${m}月）の個人開運日カレンダーを作成してください。
 
 【今日の確定日付】${td.str}
 
@@ -1505,38 +1558,47 @@ async function genCalendar(){
 ${meshikiStr}
 ${seimeiStr_}
 
-【${y}年${m}月の吉日一覧（計算済み・変更禁止）】
-${kaiuStr||'今月は主要な吉日なし（大安・仏滅等で補足してください）'}
+【${y}年${m}月の個人吉日一覧（命式計算済み・変更禁止）】
+${kaiuStr||'今月は主要な吉日なし'}
 
-⚠️ 上記の日程は計算済みです。日程を変更したり存在しない吉日を追加しないこと。
+吉日の種別説明：
+・🌟天赦日：年に数回の最強吉日。全ての罪が赦される日
+・🌱一粒万倍日：蒔いた種が万倍になる日。新しいことを始めるのに最適
+・☀️大明日：太陽が輝く吉日。何事も明るく進む
+・✨用神吉日：${name}の命式の用神と一致する個人の吉日。特に重要
+・💎日主強化日：${name}の日主を強める日。自分らしく輝ける日
 
 以下の内容でレポートを作成してください：
 
-## ${y}年${m}月（${wr(y)}${m}月）開運日カレンダー
+## ${y}年${m}月（${wr(y)}）${name}さんの個人開運日カレンダー
 
-### 今月の全体的な運気
-${y}年${m}月の月干支と全体的な運気の流れ
+### はじめに：なぜこの日が${name}さんの吉日なのか
+命式（日主・用神）と吉日の関係を分かりやすく説明
 
-### 特に重要な吉日（ベスト3）
-上記の吉日の中で${purpose}に最適な日ベスト3を選んでその理由を詳しく説明
+### ★最重要吉日TOP3
+上記吉日の中で${name}さんに最も重要な日ベスト3。
+各日について：日付・干支・吉日の種類・なぜ${name}さんに特に良いのか・何をするべきか を詳しく解説
 
-### 日ごとの詳細解説
-各吉日について、その日の特徴・向いている行動・具体的な使い方を解説
+### 用神吉日の活用法
+${name}さんの用神「${m2.yj.yj}」に合致する日の特別な意味と使い方
 
-### 避けるべき日・注意日
-今月の注意が必要な日（仏滅・不成就日等）とその理由
+### ${purpose}に最適な日
+${purpose}を行うベストタイミングとその理由
 
-### ${name}へのアドバイス
-${purpose}を成功させるための今月の心がけと行動指針
+### 今月全体の開運アドバイス
+命式から見た今月の${name}さんへの心がけと行動指針
 
-【ルール】具体的な日付を必ず含める・${name}に語りかける文体`;
+【ルール】${name}さんに直接語りかける文体・個人の命式を必ず鑑定に反映・具体的な日付を必ず含める`;
 
-  try{const txt=await callAPI([{role:'user',content:prompt}],8000);rb.className='rbox';rb.textContent=txt;saveGAS('開運日',name,birth||'',purpose,txt);}
-  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  try{
+    const txt=await callAPI([{role:'user',content:prompt}],8000);
+    rb.className='rbox';rb.textContent=txt;
+    saveGAS('開運日',name,birth,purpose,txt);
+  }catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
   btn.disabled=false;btn.textContent='📅 開運日を計算する';
 }
 
-// ── 月運レポート 生成 ──
+
 async function genReport(){
   const k=getKey();if(!k)return;
   const sei_=document.getElementById('rep-sei')?.value.trim()||'';
