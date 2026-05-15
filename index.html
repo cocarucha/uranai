@@ -3,103 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔮 占い師ツール</title>
+<title>🔮 月乃つむぎ占い</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:      #FDF6F0;
-  --bg2:     #FFF0F3;
-  --border:  #E8C8C8;
-  --gold:    #B8860B;
-  --gold-lt: #D4A84B;
-  --rose:    #C06080;
-  --rose-lt: #E8A0B0;
-  --text:    #3D1C2E;
-  --text2:   #7A5060;
-  --text3:   #A07080;
-  --input-bg:#FFFAF8;
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#FDF6F0;--bg2:#FFF0F3;--border:#E8C8C8;
+  --gold:#B8860B;--gold-lt:#D4A84B;
+  --rose:#C06080;--rose-lt:#E8A0B0;
+  --text:#3D1C2E;--text2:#7A5060;--text3:#A07080;
+  --in:#FFFAF8;--ok:#2e7d32;--ng:#c62828;--warn:#e65100;
 }
-body { font-family:'Hiragino Mincho ProN','Yu Mincho',serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:16px; }
-
-header { text-align:center; padding:2rem 1rem 1.5rem; border-bottom:2px solid var(--border); background:linear-gradient(180deg,#FDE8EE 0%,var(--bg) 100%); }
-header h1 { font-size:1.6rem; font-weight:400; letter-spacing:.12em; color:var(--rose); }
-header p  { font-size:.8rem; color:var(--text3); margin-top:6px; }
-
-.container { max-width:720px; margin:0 auto; padding:1.5rem 1rem 3rem; }
-
-/* APIキー */
-.api-toggle { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:.82rem; color:var(--text3); margin-bottom:1.5rem; padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg2); width:fit-content; user-select:none; }
-.api-toggle:hover { color:var(--rose); }
-.api-section { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:1.2rem; margin-bottom:1.5rem; display:none; flex-wrap:wrap; gap:10px; align-items:center; }
-.api-section.visible { display:flex; }
-.api-section label { font-size:.82rem; color:var(--text2); white-space:nowrap; }
-.api-section input { flex:1; min-width:200px; background:var(--input-bg); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-family:monospace; font-size:.85rem; outline:none; }
-.api-save-btn { padding:9px 18px; background:var(--gold); border:none; border-radius:8px; color:#fff; font-family:inherit; font-size:.85rem; cursor:pointer; }
-.api-status { font-size:.75rem; width:100%; color:#4CAF50; display:none; }
-
+body{font-family:'Hiragino Mincho ProN','Yu Mincho',serif;background:var(--bg);color:var(--text);font-size:16px;}
+header{text-align:center;padding:2rem 1rem 1.5rem;border-bottom:2px solid var(--border);background:linear-gradient(180deg,#FDE8EE,var(--bg));}
+header h1{font-size:1.6rem;font-weight:400;letter-spacing:.12em;color:var(--rose);}
+header p{font-size:.8rem;color:var(--text3);margin-top:6px;}
+.wrap{max-width:720px;margin:0 auto;padding:1.5rem 1rem 3rem;}
+/* API */
+.api-row{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);width:fit-content;}
+.api-box{display:none;flex-wrap:wrap;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;}
+.api-box.show{display:flex;}
+.api-box label{font-size:.82rem;color:var(--text2);white-space:nowrap;}
+.api-box input{flex:1;min-width:200px;background:var(--in);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:monospace;font-size:.85rem;outline:none;}
+.api-btn{padding:9px 18px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:inherit;font-size:.85rem;cursor:pointer;}
+.api-ok{font-size:.75rem;width:100%;color:var(--ok);display:none;}
 /* タブ */
-.tabs { display:flex; margin-bottom:1.5rem; border:1.5px solid var(--border); border-radius:10px; overflow:hidden; }
-.tab { flex:1; padding:13px 6px; text-align:center; font-size:.85rem; cursor:pointer; background:var(--bg2); color:var(--text3); border:none; font-family:inherit; transition:all .2s; }
-.tab.active { background:var(--rose); color:#fff; font-weight:500; }
-.tab:not(:last-child) { border-right:1.5px solid var(--border); }
-.panel { display:none; }
-.panel.active { display:block; }
-
+.tabs{display:flex;margin-bottom:1.5rem;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;}
+.tab{flex:1;padding:13px 4px;text-align:center;font-size:.83rem;cursor:pointer;background:var(--bg2);color:var(--text3);border:none;font-family:inherit;transition:all .2s;}
+.tab.on{background:var(--rose);color:#fff;font-weight:500;}
+.tab:not(:last-child){border-right:1.5px solid var(--border);}
+.pane{display:none;}.pane.on{display:block;}
 /* カード */
-.card { background:var(--bg2); border:1.5px solid var(--border); border-radius:14px; padding:1.5rem; margin-bottom:1rem; }
-.section-title { font-size:.78rem; letter-spacing:.12em; color:var(--gold); text-transform:uppercase; margin-bottom:1rem; padding-bottom:8px; border-bottom:1px solid var(--border); }
-
-label.lbl { display:block; font-size:.85rem; color:var(--text2); margin-bottom:5px; font-weight:500; }
-input[type="text"],input[type="date"],input[type="time"],select,textarea {
-  width:100%; background:var(--input-bg); border:1.5px solid var(--border); border-radius:8px;
-  padding:11px 14px; color:var(--text); font-family:inherit; font-size:1rem; margin-bottom:1rem;
-  outline:none; transition:border-color .2s;
-}
-input:focus,select:focus,textarea:focus { border-color:var(--rose-lt); }
-textarea { resize:vertical; min-height:90px; line-height:1.7; }
-.row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-@media(max-width:480px){ .row{ grid-template-columns:1fr; } }
-
+.card{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1rem;}
+.ctitle{font-size:.78rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border);}
+label.L{display:block;font-size:.85rem;color:var(--text2);margin-bottom:5px;font-weight:500;}
+label.Ls{font-size:.75rem;color:var(--text3);}
+input[type=text],input[type=date],input[type=time],select,textarea{width:100%;background:var(--in);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:inherit;font-size:1rem;margin-bottom:1rem;outline:none;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--rose-lt);}
+textarea{resize:vertical;min-height:90px;line-height:1.7;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.row{grid-template-columns:1fr;}}
 /* ボタン */
-.gen-btn { width:100%; padding:14px; background:linear-gradient(135deg,var(--rose),#A04060); border:none; border-radius:10px; color:#fff; font-family:inherit; font-size:1rem; letter-spacing:.08em; cursor:pointer; transition:opacity .2s; box-shadow:0 2px 8px rgba(192,96,128,.3); margin-top:4px; }
-.gen-btn:hover { opacity:.9; }
-.gen-btn:disabled { opacity:.4; cursor:not-allowed; }
-.sub-btn { width:100%; padding:12px; background:linear-gradient(135deg,var(--gold),var(--gold-lt)); border:none; border-radius:10px; color:#fff; font-family:inherit; font-size:.95rem; cursor:pointer; transition:opacity .2s; margin-bottom:8px; }
-.sub-btn:hover { opacity:.9; }
-.sub-btn:disabled { opacity:.4; cursor:not-allowed; }
-
-/* 貼り付けエリア */
-.paste-area { background:#FFFAF8; border:2px dashed var(--rose-lt); border-radius:12px; padding:1.2rem; margin-bottom:1rem; }
-.paste-area label.lbl { color:var(--rose); font-size:.9rem; }
-.paste-area textarea { border-color:var(--rose-lt); margin-bottom:0; }
-
-/* 命式表示 */
-.meshiki-box { background:#FFF8F0; border:1.5px solid var(--gold-lt); border-radius:12px; padding:1.2rem; margin-bottom:1rem; display:none; }
-.meshiki-box .title { font-size:.78rem; color:var(--gold); letter-spacing:.1em; margin-bottom:.8rem; font-weight:600; }
-.meshiki-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:.8rem; }
-.meshiki-cell { background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px; text-align:center; }
-.meshiki-cell .label { font-size:.7rem; color:var(--text3); margin-bottom:3px; }
-.meshiki-cell .kanji { font-size:1.1rem; color:var(--rose); font-weight:600; }
-.meshiki-cell .read  { font-size:.65rem; color:var(--text3); }
-.gokyo-row { display:flex; gap:6px; flex-wrap:wrap; }
-.gokyo-tag { background:#fff; border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:.8rem; color:var(--text2); }
-
-/* 画像アップロード */
-.upload-zone { border:2px dashed var(--rose-lt); border-radius:10px; padding:1.5rem 1rem; text-align:center; cursor:pointer; margin-bottom:1rem; background:#FFF8F8; transition:background .2s; }
-.upload-zone:hover { background:#FFE8EE; }
-.upload-zone .icon { font-size:1.8rem; margin-bottom:6px; }
-.upload-zone p { font-size:.82rem; color:var(--text3); line-height:1.6; }
-input[type="file"] { display:none; }
-.preview-img { width:100%; max-height:200px; object-fit:contain; border-radius:8px; border:1.5px solid var(--border); margin-bottom:1rem; }
-
+.gbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--rose),#A04060);border:none;border-radius:10px;color:#fff;font-family:inherit;font-size:1rem;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 8px rgba(192,96,128,.3);margin-top:4px;transition:opacity .2s;}
+.gbtn:hover{opacity:.9;}
+.gbtn:disabled{opacity:.4;cursor:not-allowed;}
+.sbtn{width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold-lt));border:none;border-radius:10px;color:#fff;font-family:inherit;font-size:.95rem;cursor:pointer;margin-bottom:8px;transition:opacity .2s;}
+.sbtn:hover{opacity:.9;}
+/* 貼付エリア */
+.paste{background:var(--in);border:2px dashed var(--rose-lt);border-radius:12px;padding:1.2rem;margin-bottom:1rem;}
+.paste label.L{color:var(--rose);font-size:.9rem;}
+.paste textarea{border-color:var(--rose-lt);margin-bottom:.8rem;}
+/* 命式ボックス */
+.mbox{display:none;background:#FFF8F0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1.2rem;margin-bottom:1rem;}
+.mbox .mt{font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:.8rem;}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:.8rem;}
+.mc{background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
+.mc .ml{font-size:.7rem;color:var(--text3);margin-bottom:3px;}
+.mc .mk{font-size:1.1rem;color:var(--rose);font-weight:600;}
+.mc .mr{font-size:.65rem;color:var(--text3);}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+.tag{background:#fff;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.8rem;color:var(--text2);}
+.tag.g{background:#FFF8E8;border-color:var(--gold);color:var(--gold);}
+.tag.ok{background:#e8f5e9;color:var(--ok);}
+.tag.warn{background:#fff3e0;color:var(--warn);}
+.tag.ng{background:#fce4ec;color:var(--ng);}
+.dlist{font-size:.8rem;color:var(--text2);line-height:2;margin-top:6px;}
+.dlist .cur{color:var(--rose);font-weight:600;}
+/* 姓名判断ボックス */
+.sbox{display:none;margin-top:8px;padding:10px;background:#fff8f0;border-radius:8px;border:1px solid var(--gold-lt);}
+.sbox .st{font-size:.75rem;color:var(--gold);font-weight:600;margin-bottom:6px;}
+/* 画像 */
+.upzone{border:2px dashed var(--rose-lt);border-radius:10px;padding:1.5rem 1rem;text-align:center;cursor:pointer;margin-bottom:1rem;background:#FFF8F8;transition:background .2s;}
+.upzone:hover{background:#FFE8EE;}
+.upzone .ic{font-size:1.8rem;margin-bottom:6px;}
+.upzone p{font-size:.82rem;color:var(--text3);line-height:1.6;}
+input[type=file]{display:none;}
+.prev{width:100%;max-height:200px;object-fit:contain;border-radius:8px;border:1.5px solid var(--border);margin-bottom:1rem;}
 /* 結果 */
-.result-area { margin-top:1rem; }
-.result-box { background:#FFFAF8; border:1.5px solid var(--border); border-radius:12px; padding:1.5rem; font-size:1rem; line-height:2; color:var(--text); white-space:pre-wrap; min-height:100px; }
-.result-box.loading { color:var(--text3); font-style:italic; }
-.copy-btn { width:100%; margin-top:10px; padding:11px; background:transparent; border:1.5px solid var(--border); border-radius:8px; color:var(--text2); font-family:inherit; font-size:.9rem; cursor:pointer; }
-.copy-btn:hover { background:var(--bg2); }
-.daiun-list .current { color:var(--rose); font-weight:600; }
-.notice { font-size:.78rem; color:var(--text3); text-align:center; margin-top:10px; line-height:1.7; }
+.rbox{background:var(--in);border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;font-size:1rem;line-height:2;color:var(--text);white-space:pre-wrap;min-height:100px;}
+.rbox.loading{color:var(--text3);font-style:italic;}
+.cbtn{width:100%;margin-top:10px;padding:11px;background:transparent;border:1.5px solid var(--border);border-radius:8px;color:var(--text2);font-family:inherit;font-size:.9rem;cursor:pointer;}
+.cbtn:hover{background:var(--bg2);}
+.note{font-size:.78rem;color:var(--text3);text-align:center;margin-top:10px;line-height:1.7;}
 </style>
 </head>
 <body>
@@ -107,876 +91,1551 @@ input[type="file"] { display:none; }
   <h1>🔮 占い師ツール</h1>
   <p>四柱推命・手相診断・相性占い 鑑定書ジェネレーター</p>
 </header>
+<div class="wrap">
 
-<div class="container">
+<!-- API -->
+<div class="api-row" onclick="toggleApi()"><span>⚙️ APIキー設定</span><span id="api-ic">▶</span></div>
+<div class="api-box" id="api-box">
+  <label>Anthropic APIキー</label>
+  <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off">
+  <button class="api-btn" onclick="saveKey()">保存</button>
+  <p class="api-ok" id="api-ok">✓ 保存済みです</p>
+</div>
 
-  <!-- APIキー -->
-  <div class="api-toggle" onclick="toggleApi()" id="api-toggle-btn">
-    <span>⚙️ APIキー設定</span>
-    <span id="api-toggle-icon">▶</span>
+<!-- タブ -->
+<div class="tabs" style="flex-wrap:wrap;border-radius:12px;">
+  <button class="tab on" id="tab-s" onclick="tab('s')" style="min-width:80px">🌙 四柱推命</button>
+  <button class="tab" id="tab-t" onclick="tab('t')" style="min-width:60px">✋ 手相</button>
+  <button class="tab" id="tab-ab" onclick="tab('ab')" style="min-width:70px">💑 相性</button>
+  <button class="tab" id="tab-num" onclick="tab('num')" style="min-width:60px">🔢 数秘術</button>
+  <button class="tab" id="tab-kyu" onclick="tab('kyu')" style="min-width:60px">⭐ 九星</button>
+  <button class="tab" id="tab-tar" onclick="tab('tar')" style="min-width:70px">🃏 タロット</button>
+  <button class="tab" id="tab-cal" onclick="tab('cal')" style="min-width:70px">📅 開運日</button>
+  <button class="tab" id="tab-rep" onclick="tab('rep')" style="min-width:80px">📊 月運</button>
+</div>
+
+<!-- ══ 四柱推命 ══ -->
+<div class="pane on" id="pane-s">
+  <div class="paste">
+    <label class="L">📋 Googleフォーム回答を貼り付け（自動入力）</label>
+    <textarea id="s-paste" rows="4" placeholder="スプレッドシートから回答をコピーして貼り付けてください"></textarea>
+    <button class="sbtn" onclick="doPaste('s')">📥 回答を読み込む</button>
   </div>
-  <div class="api-section" id="api-section">
-    <label>Anthropic APIキー</label>
-    <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off">
-    <button class="api-save-btn" onclick="saveApiKey()">保存</button>
-    <p class="api-status" id="api-status">✓ APIキーを保存済みです</p>
+  <div class="card">
+    <div class="ctitle">お客様の基本情報</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="s-sei" placeholder="例：佐藤" oninput="onSeiMei('s')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="s-mei" placeholder="例：花子" oninput="onSeiMei('s')"></div>
+    </div>
+    <input type="hidden" id="s-name">
+    <div class="row">
+      <div><label class="L">生年月日</label><input type="date" id="s-birth" onchange="onBirth('s')"></div>
+      <div><label class="L">出生時刻（任意）</label><input type="time" id="s-time" onchange="onBirth('s')"></div>
+    </div>
+    <label class="L">性別</label>
+    <select id="s-gender" onchange="onBirth('s')">
+      <option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option>
+    </select>
+    <label class="L">相談テーマ</label>
+    <select id="s-theme">
+      <option value="総合運">総合運</option><option value="恋愛・結婚運">恋愛・結婚運</option>
+      <option value="仕事・キャリア運">仕事・キャリア運</option><option value="金運・財運">金運・財運</option>
+      <option value="対人関係運">対人関係運</option>
+    </select>
+    <label class="L">悩みや状況</label>
+    <textarea id="s-memo" rows="3" placeholder="具体的に記入（例：転職を迷っている、好きな人がいるが踏み出せない）"></textarea>
+    <label class="L">出身地・育った環境</label>
+    <input type="text" id="s-origin" placeholder="例：大阪府出身、3人兄弟の長女">
+    <label class="L">現在の仕事・生活状況</label>
+    <input type="text" id="s-job" placeholder="例：会社員（営業）、一人暮らし">
+    <label class="L">過去の大きな転機・出来事</label>
+    <textarea id="s-past" rows="2" placeholder="例：25歳で転職、昨年離婚"></textarea>
   </div>
-
-  <!-- タブ -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('shichu')">🌙 四柱推命</button>
-    <button class="tab" onclick="switchTab('tesou')">✋ 手相診断</button>
-    <button class="tab" onclick="switchTab('aisho')">💑 相性占い</button>
+  <div class="mbox" id="s-mbox">
+    <div class="mt">🔮 計算済み命式（自動計算・確定値）</div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">年柱</div><div class="mk" id="s-nk">—</div><div class="mr" id="s-nr"></div></div>
+      <div class="mc"><div class="ml">月柱</div><div class="mk" id="s-tk">—</div><div class="mr" id="s-tr"></div></div>
+      <div class="mc"><div class="ml">日柱</div><div class="mk" id="s-dk">—</div><div class="mr" id="s-dr"></div></div>
+      <div class="mc"><div class="ml">時柱</div><div class="mk" id="s-jk">—</div><div class="mr" id="s-jr"></div></div>
+    </div>
+    <div class="tags" id="s-gk"></div>
+    <div class="sbox" id="s-sbox"><div class="st">📝 姓名判断（熊崎式五格）</div><div class="tags" id="s-stags"></div></div>
+    <div class="dlist" id="s-dl"></div>
   </div>
-
-  <!-- ══ 四柱推命 ══ -->
-  <div class="panel active" id="panel-shichu">
-
-    <!-- フォーム回答貼り付け -->
-    <div class="paste-area">
-      <label class="lbl">📋 Googleフォームの回答をここに貼り付け</label>
-      <textarea id="s-paste" rows="6" placeholder="Googleスプレッドシートから回答をコピーして貼り付けてください。
-自動で各項目に入力されます。"></textarea>
-      <button class="sub-btn" onclick="parseShinchPaste()">📥 回答を読み込む</button>
-    </div>
-
-    <div class="card">
-      <div class="section-title">お客様の基本情報</div>
-      <label class="lbl">お名前（フルネーム推奨）</label>
-      <div class="row">
-        <div><label class="lbl" style="font-size:.75rem">姓（苗字）</label><input type="text" id="s-sei" placeholder="例：田中" oninput="updateSeiMei('s')"></div>
-        <div><label class="lbl" style="font-size:.75rem">名（名前）</label><input type="text" id="s-mei" placeholder="例：太郎" oninput="updateSeiMei('s')"></div>
-      </div>
-      <input type="hidden" id="s-name" value="">
-      <div class="row">
-        <div>
-          <label class="lbl">生年月日</label>
-          <input type="date" id="s-birth" onchange="updateMeshiki()">
-        </div>
-        <div>
-          <label class="lbl">出生時刻（任意）</label>
-          <input type="time" id="s-time" onchange="updateMeshiki()">
-        </div>
-      </div>
-      <label class="lbl">性別</label>
-      <select id="s-gender">
-        <option value="女性">女性</option>
-        <option value="男性">男性</option>
-        <option value="その他">その他</option>
-      </select>
-      <label class="lbl">相談テーマ</label>
-      <select id="s-theme">
-        <option value="総合運">総合運</option>
-        <option value="恋愛・結婚運">恋愛・結婚運</option>
-        <option value="仕事・キャリア運">仕事・キャリア運</option>
-        <option value="金運・財運">金運・財運</option>
-        <option value="対人関係運">対人関係運</option>
-      </select>
-      <label class="lbl">悩みや状況</label>
-      <textarea id="s-memo" rows="3" placeholder="フォーム回答から自動入力されます"></textarea>
-      <label class="lbl">出身地・育った環境</label>
-      <input type="text" id="s-origin" placeholder="例：東京都出身、3人兄弟の長女">
-      <label class="lbl">現在の仕事・生活状況</label>
-      <input type="text" id="s-job" placeholder="例：会社員（営業職）、一人暮らし">
-      <label class="lbl">過去の大きな転機・出来事</label>
-      <textarea id="s-past" rows="3" placeholder="例：25歳で転職、昨年離婚など"></textarea>
-    </div>
-
-    <!-- 命式表示ボックス -->
-    <div class="meshiki-box" id="s-meshiki-box">
-      <div class="title">🔮 計算済み命式（自動計算）</div>
-      <div class="meshiki-grid">
-        <div class="meshiki-cell"><div class="label">年柱</div><div class="kanji" id="s-nen-k">—</div><div class="read" id="s-nen-r"></div></div>
-        <div class="meshiki-cell"><div class="label">月柱</div><div class="kanji" id="s-tsuki-k">—</div><div class="read" id="s-tsuki-r"></div></div>
-        <div class="meshiki-cell"><div class="label">日柱</div><div class="kanji" id="s-nichi-k">—</div><div class="read" id="s-nichi-r"></div></div>
-        <div class="meshiki-cell"><div class="label">時柱</div><div class="kanji" id="s-ji-k">—</div><div class="read" id="s-ji-r"></div></div>
-      </div>
-      <div class="gokyo-row" id="s-gokyo"></div>
-      <div class="daiun-list" id="s-daiun" style="font-size:.8rem;color:var(--text2);line-height:1.9;margin-top:6px;"></div>
-    </div>
-
-    <button class="gen-btn" id="s-btn" onclick="generateShichu()">✨ 鑑定書を生成する</button>
-
-    <div class="result-area" id="s-result-area" style="display:none">
-      <div class="result-box" id="s-result"></div>
-      <button class="copy-btn" onclick="copyResult('s-result')">📋 鑑定文をコピー</button>
-      <p class="notice">※ AIが生成した鑑定文です。納品前にご確認・編集ください。</p>
-    </div>
+  <button class="gbtn" id="s-btn" onclick="genShichu()">✨ 鑑定書を生成する</button>
+  <div id="s-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="s-r"></div>
+    <button class="cbtn" onclick="cp('s-r')">📋 鑑定文をコピー</button>
+    <p class="note">※AIが生成した鑑定文です。納品前にご確認・編集ください。</p>
   </div>
+</div>
 
-  <!-- ══ 手相診断 ══ -->
-  <div class="panel" id="panel-tesou">
-
-    <div class="paste-area">
-      <label class="lbl">📋 Googleフォームの回答をここに貼り付け</label>
-      <textarea id="t-paste" rows="5" placeholder="Googleスプレッドシートから回答をコピーして貼り付けてください。"></textarea>
-      <button class="sub-btn" onclick="parseTesouPaste()">📥 回答を読み込む</button>
-    </div>
-
-    <div class="card">
-      <div class="section-title">お客様の情報</div>
-      <label class="lbl">お名前</label>
-      <input type="text" id="t-name" placeholder="例：山田花子さん">
-      <div class="row">
-        <div>
-          <label class="lbl">診断する手</label>
-          <select id="t-hand">
-            <option value="右手">右手</option>
-            <option value="左手">左手</option>
-            <option value="両手">両手</option>
-          </select>
-        </div>
-        <div>
-          <label class="lbl">相談テーマ</label>
-          <select id="t-theme">
-            <option value="総合運">総合運</option>
-            <option value="恋愛・結婚運">恋愛・結婚運</option>
-            <option value="仕事運">仕事運</option>
-            <option value="金運">金運</option>
-            <option value="健康運">健康運</option>
-          </select>
-        </div>
+<!-- ══ 手相 ══ -->
+<div class="pane" id="pane-t">
+  <div class="paste">
+    <label class="L">📋 Googleフォーム回答を貼り付け（自動入力）</label>
+    <textarea id="t-paste" rows="4" placeholder="スプレッドシートから回答をコピーして貼り付けてください"></textarea>
+    <button class="sbtn" onclick="doPaste('t')">📥 回答を読み込む</button>
+  </div>
+  <div class="card">
+    <div class="ctitle">お客様の情報</div>
+    <label class="L">お名前</label>
+    <input type="text" id="t-name" placeholder="例：花子さん">
+    <div class="row">
+      <div><label class="L">診断する手</label>
+        <select id="t-hand"><option value="右手">右手</option><option value="左手">左手</option><option value="両手">両手</option></select>
       </div>
-      <label class="lbl">悩みや状況</label>
-      <textarea id="t-memo" rows="3" placeholder="フォーム回答から自動入力されます"></textarea>
-
-      <label class="lbl">手のひら写真（1枚目・必須）</label>
-      <div class="upload-zone" onclick="document.getElementById('t-file1').click()">
-        <div class="icon">🤚</div>
-        <p>クリックして写真を選択<br><span style="font-size:.75rem">明るい場所で手を広げて撮影した写真</span></p>
-      </div>
-      <input type="file" id="t-file1" accept="image/*" onchange="previewImg(event,'t-prev1','t-file2-area','t-btn')">
-      <img id="t-prev1" class="preview-img" style="display:none">
-
-      <div id="t-file2-area" style="display:none">
-        <label class="lbl">手のひら写真（2枚目・任意）</label>
-        <div class="upload-zone" onclick="document.getElementById('t-file2').click()">
-          <div class="icon">🖐</div>
-          <p>もう一方の手の写真（両手診断の場合）</p>
-        </div>
-        <input type="file" id="t-file2" accept="image/*" onchange="previewImg2(event)">
-        <img id="t-prev2" class="preview-img" style="display:none">
+      <div><label class="L">相談テーマ</label>
+        <select id="t-theme"><option value="総合運">総合運</option><option value="恋愛・結婚運">恋愛・結婚運</option><option value="仕事運">仕事運</option><option value="金運">金運</option><option value="健康運">健康運</option></select>
       </div>
     </div>
-
-    <button class="gen-btn" id="t-btn" onclick="generateTesou()" disabled>✨ 診断書を生成する</button>
-
-    <div class="result-area" id="t-result-area" style="display:none">
-      <div class="result-box" id="t-result"></div>
-      <button class="copy-btn" onclick="copyResult('t-result')">📋 診断文をコピー</button>
-      <p class="notice">※ AIが生成した診断文です。納品前にご確認・編集ください。</p>
+    <label class="L">悩みや状況</label>
+    <textarea id="t-memo" rows="3" placeholder="例：結婚線が気になる、仕事運が低迷している"></textarea>
+    <label class="L">手のひら写真（1枚目・必須）</label>
+    <div class="upzone" onclick="document.getElementById('t-f1').click()">
+      <div class="ic">🤚</div>
+      <p>クリックして写真を選択<br><span style="font-size:.75rem">明るい場所・手を広げた状態で撮影</span></p>
+    </div>
+    <input type="file" id="t-f1" accept="image/*" onchange="prevImg(event,'t-p1','t-f2w','t-btn')">
+    <img id="t-p1" class="prev" style="display:none">
+    <div id="t-f2w" style="display:none">
+      <label class="L">手のひら写真（2枚目・任意）</label>
+      <div class="upzone" onclick="document.getElementById('t-f2').click()">
+        <div class="ic">🖐</div><p>もう一方の手（両手診断の場合）</p>
+      </div>
+      <input type="file" id="t-f2" accept="image/*" onchange="prevImg2(event)">
+      <img id="t-p2" class="prev" style="display:none">
     </div>
   </div>
+  <button class="gbtn" id="t-btn" onclick="genTesou()" disabled>✨ 診断書を生成する</button>
+  <div id="t-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="t-r"></div>
+    <button class="cbtn" onclick="cp('t-r')">📋 診断文をコピー</button>
+    <p class="note">※AIが生成した診断文です。納品前にご確認・編集ください。</p>
+  </div>
+</div>
 
-  <!-- ══ 相性占い ══ -->
-  <div class="panel" id="panel-aisho">
-
-    <div class="paste-area">
-      <label class="lbl">📋 Googleフォームの回答をここに貼り付け</label>
-      <textarea id="ab-paste" rows="6" placeholder="Googleスプレッドシートから回答をコピーして貼り付けてください。"></textarea>
-      <button class="sub-btn" onclick="parseAishoPaste()">📥 回答を読み込む</button>
+<!-- ══ 相性占い ══ -->
+<div class="pane" id="pane-ab">
+  <div class="paste">
+    <label class="L">📋 Googleフォーム回答を貼り付け（自動入力）</label>
+    <textarea id="ab-paste" rows="5" placeholder="スプレッドシートから回答をコピーして貼り付けてください"></textarea>
+    <button class="sbtn" onclick="doPaste('ab')">📥 回答を読み込む</button>
+  </div>
+  <div class="card">
+    <div class="ctitle">Aさん（お客様）</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="a-sei" placeholder="例：佐藤" oninput="onSeiMei('a')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="a-mei" placeholder="例：花子" oninput="onSeiMei('a')"></div>
     </div>
-
-    <div class="card">
-      <div class="section-title">Aさん（お客様）</div>
-      <label class="lbl">お名前</label>
-      <input type="text" id="a-name" placeholder="例：田中さくら">
-      <div class="row">
-        <div><label class="lbl">生年月日</label><input type="date" id="a-birth" onchange="updateAishoMeshiki()"></div>
-        <div><label class="lbl">出生時刻（任意）</label><input type="time" id="a-time" onchange="updateAishoMeshiki()"></div>
+    <input type="hidden" id="a-name">
+    <div class="row">
+      <div><label class="L">生年月日</label><input type="date" id="a-birth" onchange="onBirth('a')"></div>
+      <div><label class="L">出生時刻（任意）</label><input type="time" id="a-time" onchange="onBirth('a')"></div>
+    </div>
+    <label class="L">性別</label>
+    <select id="a-gender" onchange="onBirth('a')"><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option></select>
+  </div>
+  <div class="mbox" id="a-mbox">
+    <div class="mt">🔮 Aさんの命式（自動計算）</div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">年柱</div><div class="mk" id="a-nk">—</div><div class="mr" id="a-nr"></div></div>
+      <div class="mc"><div class="ml">月柱</div><div class="mk" id="a-tk">—</div><div class="mr" id="a-tr"></div></div>
+      <div class="mc"><div class="ml">日柱</div><div class="mk" id="a-dk">—</div><div class="mr" id="a-dr"></div></div>
+      <div class="mc"><div class="ml">時柱</div><div class="mk" id="a-jk">—</div><div class="mr" id="a-jr"></div></div>
+    </div>
+    <div class="tags" id="a-gk"></div>
+    <div class="sbox" id="a-sbox"><div class="st">📝 Aさんの姓名判断（熊崎式）</div><div class="tags" id="a-stags"></div></div>
+    <div class="dlist" id="a-dl"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Bさん（お相手）</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="b-sei" placeholder="例：鈴木" oninput="onSeiMei('b')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="b-mei" placeholder="例：太郎" oninput="onSeiMei('b')"></div>
+    </div>
+    <input type="hidden" id="b-name">
+    <div class="row">
+      <div><label class="L">生年月日</label><input type="date" id="b-birth" onchange="onBirth('b')"></div>
+      <div><label class="L">出生時刻（任意）</label><input type="time" id="b-time" onchange="onBirth('b')"></div>
+    </div>
+    <label class="L">性別</label>
+    <select id="b-gender" onchange="onBirth('b')"><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select>
+  </div>
+  <div class="mbox" id="b-mbox">
+    <div class="mt">🔮 Bさんの命式（自動計算）</div>
+    <div class="mgrid">
+      <div class="mc"><div class="ml">年柱</div><div class="mk" id="b-nk">—</div><div class="mr" id="b-nr"></div></div>
+      <div class="mc"><div class="ml">月柱</div><div class="mk" id="b-tk">—</div><div class="mr" id="b-tr"></div></div>
+      <div class="mc"><div class="ml">日柱</div><div class="mk" id="b-dk">—</div><div class="mr" id="b-dr"></div></div>
+      <div class="mc"><div class="ml">時柱</div><div class="mk" id="b-jk">—</div><div class="mr" id="b-jr"></div></div>
+    </div>
+    <div class="tags" id="b-gk"></div>
+    <div class="sbox" id="b-sbox"><div class="st">📝 Bさんの姓名判断（熊崎式）</div><div class="tags" id="b-stags"></div></div>
+    <div class="dlist" id="b-dl"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">相談内容</div>
+    <label class="L">お二人の関係</label>
+    <select id="ab-rel">
+      <option value="恋人・交際中">恋人・交際中</option><option value="気になっている相手">気になっている相手</option>
+      <option value="片思い中">片思い中</option><option value="元恋人・復縁希望">元恋人・復縁希望</option>
+      <option value="結婚を考えている相手">結婚を考えている相手</option><option value="ビジネスパートナー">ビジネスパートナー</option>
+      <option value="友人・知人">友人・知人</option><option value="家族・親族">家族・親族</option><option value="その他">その他</option>
+    </select>
+    <label class="L">相談テーマ</label>
+    <select id="ab-theme">
+      <option value="総合的な相性">総合的な相性</option><option value="恋愛・結婚の相性">恋愛・結婚の相性</option>
+      <option value="長続きするか・将来性">長続きするか・将来性</option><option value="ビジネス・仕事の相性">ビジネス・仕事の相性</option>
+      <option value="復縁の可能性">復縁の可能性</option><option value="関係をよくするアドバイス">関係をよくするアドバイス</option>
+    </select>
+    <label class="L">状況や悩み <span style="font-size:.72rem;color:var(--rose)">※具体的に</span></label>
+    <textarea id="ab-memo" rows="4" placeholder="例：最近すれ違いが多い、告白しようか迷っている"></textarea>
+  </div>
+  <button class="gbtn" id="ab-btn" onclick="genAisho()">✨ 相性鑑定書を生成する</button>
+  <div id="ab-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="ab-r"></div>
+    <button class="cbtn" onclick="cp('ab-r')">📋 鑑定文をコピー</button>
+    <p class="note">※AIが生成した鑑定文です。納品前にご確認・編集ください。</p>
+  </div>
+</div>
+<!-- ══ 数秘術 ══ -->
+<div class="pane" id="pane-num">
+  <div class="card">
+    <div class="ctitle">数秘術（ライフパスナンバー）</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="num-sei" placeholder="例：佐藤" oninput="onSeiMei('num')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="num-mei" placeholder="例：花子" oninput="onSeiMei('num')"></div>
+    </div>
+    <input type="hidden" id="num-name">
+    <div class="row">
+      <div><label class="L">生年月日</label><input type="date" id="num-birth"></div>
+      <div><label class="L">性別</label>
+        <select id="num-gender"><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option></select>
       </div>
-      <label class="lbl">性別</label>
-      <select id="a-gender"><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option></select>
     </div>
-
-    <div class="meshiki-box" id="a-meshiki-box">
-      <div class="title">🔮 Aさんの命式（自動計算）</div>
-      <div class="meshiki-grid">
-        <div class="meshiki-cell"><div class="label">年柱</div><div class="kanji" id="a-nen-k">—</div><div class="read" id="a-nen-r"></div></div>
-        <div class="meshiki-cell"><div class="label">月柱</div><div class="kanji" id="a-tsuki-k">—</div><div class="read" id="a-tsuki-r"></div></div>
-        <div class="meshiki-cell"><div class="label">日柱</div><div class="kanji" id="a-nichi-k">—</div><div class="read" id="a-nichi-r"></div></div>
-        <div class="meshiki-cell"><div class="label">時柱</div><div class="kanji" id="a-ji-k">—</div><div class="read" id="a-ji-r"></div></div>
-      </div>
-      <div class="gokyo-row" id="a-gokyo"></div>
-      <div class="daiun-list" id="a-daiun" style="font-size:.8rem;color:var(--text2);line-height:1.9;margin-top:6px;"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-title">Bさん（お相手）</div>
-      <label class="lbl">お名前</label>
-      <input type="text" id="b-name" placeholder="例：佐藤たろう">
-      <div class="row">
-        <div><label class="lbl">生年月日</label><input type="date" id="b-birth" onchange="updateAishoMeshiki()"></div>
-        <div><label class="lbl">出生時刻（任意）</label><input type="time" id="b-time" onchange="updateAishoMeshiki()"></div>
-      </div>
-      <label class="lbl">性別</label>
-      <select id="b-gender"><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select>
-    </div>
-
-    <div class="meshiki-box" id="b-meshiki-box">
-      <div class="title">🔮 Bさんの命式（自動計算）</div>
-      <div class="meshiki-grid">
-        <div class="meshiki-cell"><div class="label">年柱</div><div class="kanji" id="b-nen-k">—</div><div class="read" id="b-nen-r"></div></div>
-        <div class="meshiki-cell"><div class="label">月柱</div><div class="kanji" id="b-tsuki-k">—</div><div class="read" id="b-tsuki-r"></div></div>
-        <div class="meshiki-cell"><div class="label">日柱</div><div class="kanji" id="b-nichi-k">—</div><div class="read" id="b-nichi-r"></div></div>
-        <div class="meshiki-cell"><div class="label">時柱</div><div class="kanji" id="b-ji-k">—</div><div class="read" id="b-ji-r"></div></div>
-      </div>
-      <div class="gokyo-row" id="b-gokyo"></div>
-      <div class="daiun-list" id="b-daiun" style="font-size:.8rem;color:var(--text2);line-height:1.9;margin-top:6px;"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-title">相談内容</div>
-      <label class="lbl">お二人の関係</label>
-      <select id="ab-rel">
-        <option value="恋人・交際中">恋人・交際中</option>
-        <option value="気になっている相手">気になっている相手</option>
-        <option value="片思い中">片思い中</option>
-        <option value="元恋人・復縁希望">元恋人・復縁希望</option>
-        <option value="結婚を考えている相手">結婚を考えている相手</option>
-        <option value="ビジネスパートナー">ビジネスパートナー</option>
-        <option value="友人・知人">友人・知人</option>
-        <option value="家族・親族">家族・親族</option>
-        <option value="その他">その他</option>
-      </select>
-      <label class="lbl">相談テーマ</label>
-      <select id="ab-theme">
-        <option value="総合的な相性">総合的な相性</option>
-        <option value="恋愛・結婚の相性">恋愛・結婚の相性</option>
-        <option value="長続きするか・将来性">長続きするか・将来性</option>
-        <option value="ビジネス・仕事の相性">ビジネス・仕事の相性</option>
-        <option value="復縁の可能性">復縁の可能性</option>
-        <option value="関係をよくするアドバイス">関係をよくするアドバイス</option>
-      </select>
-      <label class="lbl">状況や悩み <span style="font-size:.72rem;color:var(--rose)">※ 具体的に書くほど精度が上がります</span></label>
-      <textarea id="ab-memo" rows="4" placeholder="フォーム回答から自動入力されます"></textarea>
-    </div>
-
-    <button class="gen-btn" id="ab-btn" onclick="generateAisho()">✨ 相性鑑定書を生成する</button>
-
-    <div class="result-area" id="ab-result-area" style="display:none">
-      <div class="result-box" id="ab-result"></div>
-      <button class="copy-btn" onclick="copyResult('ab-result')">📋 鑑定文をコピー</button>
-      <p class="notice">※ AIが生成した鑑定文です。納品前にご確認・編集ください。</p>
+    <label class="L">相談テーマ</label>
+    <select id="num-theme">
+      <option value="総合運">総合運</option><option value="恋愛・結婚運">恋愛・結婚運</option>
+      <option value="仕事・キャリア">仕事・キャリア</option><option value="人生の使命">人生の使命</option>
+    </select>
+    <label class="L">悩みや状況</label>
+    <textarea id="num-memo" rows="3" placeholder="具体的に記入してください"></textarea>
+    <div id="num-result-box" style="display:none;background:#FFF8F0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">🔢 計算済み数秘術</div>
+      <div class="tags" id="num-tags"></div>
     </div>
   </div>
+  <div id="num-sbox" style="display:none;background:#fff8f0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+    <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">📝 姓名判断（熊崎式五格）</div>
+    <div class="tags" id="num-stags"></div>
+  </div>
+  <button class="gbtn" id="num-btn" onclick="genNumerology()">✨ 鑑定書を生成する</button>
+  <div id="num-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="num-r"></div>
+    <button class="cbtn" onclick="cp('num-r')">📋 コピー</button>
+    <p class="note">※AIが生成した鑑定文です。納品前にご確認ください。</p>
+  </div>
+</div>
 
-</div><!-- /container -->
+<!-- ══ 九星気学 ══ -->
+<div class="pane" id="pane-kyu">
+  <div class="card">
+    <div class="ctitle">九星気学</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="kyu-sei" placeholder="例：佐藤" oninput="onSeiMei('kyu')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="kyu-mei" placeholder="例：花子" oninput="onSeiMei('kyu')"></div>
+    </div>
+    <input type="hidden" id="kyu-name">
+    <div class="row">
+      <div><label class="L">生年月日</label><input type="date" id="kyu-birth"></div>
+      <div><label class="L">性別</label>
+        <select id="kyu-gender"><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option></select>
+      </div>
+    </div>
+    <label class="L">相談テーマ</label>
+    <select id="kyu-theme">
+      <option value="総合運">総合運</option><option value="恋愛・結婚運">恋愛・結婚運</option>
+      <option value="仕事運">仕事運</option><option value="方位・引越し">方位・引越し</option><option value="金運">金運</option>
+    </select>
+    <label class="L">悩みや状況</label>
+    <textarea id="kyu-memo" rows="3" placeholder="具体的に記入してください"></textarea>
+    <div id="kyu-result-box" style="display:none;background:#FFF8F0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">⭐ 計算済み九星</div>
+      <div class="tags" id="kyu-tags"></div>
+    </div>
+  </div>
+  <div id="kyu-sbox" style="display:none;background:#fff8f0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+    <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">📝 姓名判断（熊崎式五格）</div>
+    <div class="tags" id="kyu-stags"></div>
+  </div>
+  <button class="gbtn" id="kyu-btn" onclick="genKyusei()">✨ 鑑定書を生成する</button>
+  <div id="kyu-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="kyu-r"></div>
+    <button class="cbtn" onclick="cp('kyu-r')">📋 コピー</button>
+    <p class="note">※AIが生成した鑑定文です。納品前にご確認ください。</p>
+  </div>
+</div>
 
+<!-- ══ タロット ══ -->
+<div class="pane" id="pane-tar">
+  <div class="card">
+    <div class="ctitle">タロット占い</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="tar-sei" placeholder="例：佐藤" oninput="onSeiMei('tar')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="tar-mei" placeholder="例：花子" oninput="onSeiMei('tar')"></div>
+    </div>
+    <input type="hidden" id="tar-name">
+    <label class="L">相談テーマ・質問</label>
+    <select id="tar-theme">
+      <option value="恋愛・結婚">恋愛・結婚</option><option value="仕事・転職">仕事・転職</option>
+      <option value="人間関係">人間関係</option><option value="総合的な運勢">総合的な運勢</option>
+      <option value="決断・選択">決断・選択</option>
+    </select>
+    <label class="L">具体的な質問・状況</label>
+    <textarea id="tar-memo" rows="3" placeholder="例：好きな人との関係はどうなる？転職すべきか？"></textarea>
+    <label class="L">スプレッド（展開法）</label>
+    <select id="tar-spread">
+      <option value="ワンオラクル（1枚）">ワンオラクル（1枚）シンプルな答え</option>
+      <option value="スリーカード（3枚）">スリーカード（3枚）過去・現在・未来</option>
+      <option value="ケルト十字（5枚）">ケルト十字（5枚）詳細な状況分析</option>
+    </select>
+    <div id="tar-cards-box" style="display:none;background:#FFF8F0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:8px;">🃏 引いたカード</div>
+      <div id="tar-cards" class="tags"></div>
+    </div>
+    <button class="sbtn" onclick="drawCards()">🃏 カードを引く</button>
+  </div>
+  <div id="tar-sbox" style="display:none;background:#fff8f0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+    <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">📝 姓名判断（熊崎式五格）</div>
+    <div class="tags" id="tar-stags"></div>
+  </div>
+  <button class="gbtn" id="tar-btn" onclick="genTarot()" disabled>✨ 鑑定書を生成する</button>
+  <div id="tar-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="tar-r"></div>
+    <button class="cbtn" onclick="cp('tar-r')">📋 コピー</button>
+    <p class="note">※AIが生成した鑑定文です。納品前にご確認ください。</p>
+  </div>
+</div>
+
+<!-- ══ 開運日カレンダー ══ -->
+<div class="pane" id="pane-cal">
+  <div class="card">
+    <div class="ctitle">開運日カレンダー（天赦日・一粒万倍日・大明日）</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="cal-sei" placeholder="例：佐藤" oninput="onSeiMei('cal')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="cal-mei" placeholder="例：花子" oninput="onSeiMei('cal')"></div>
+    </div>
+    <input type="hidden" id="cal-name">
+    <div class="row">
+      <div><label class="L">生年月日（任意）</label><input type="date" id="cal-birth"></div>
+      <div><label class="L">表示する月</label><input type="month" id="cal-month"></div>
+    </div>
+    <label class="L">用途・目的</label>
+    <select id="cal-purpose">
+      <option value="全般">全般（総合的な吉日）</option>
+      <option value="恋愛・婚活">恋愛・婚活（告白・デート・プロポーズ）</option>
+      <option value="仕事・起業">仕事・起業（契約・開業・転職）</option>
+      <option value="金運・投資">金運・投資（購入・申込）</option>
+      <option value="引越し・旅行">引越し・旅行</option>
+    </select>
+  </div>
+  <div id="cal-sbox" style="display:none;background:#fff8f0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+    <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">📝 姓名判断（熊崎式五格）</div>
+    <div class="tags" id="cal-stags"></div>
+  </div>
+  <button class="gbtn" id="cal-btn" onclick="genCalendar()">📅 開運日を計算する</button>
+  <div id="cal-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="cal-r"></div>
+    <button class="cbtn" onclick="cp('cal-r')">📋 コピー</button>
+    <p class="note">※AIが生成した開運日レポートです。</p>
+  </div>
+</div>
+
+<!-- ══ 月運レポート ══ -->
+<div class="pane" id="pane-rep">
+  <div class="card">
+    <div class="ctitle">今月・来月の運気レポート（月額サービス用）</div>
+    <label class="L">お名前（フルネーム推奨）</label>
+    <div class="row">
+      <div><label class="L Ls">姓（苗字）</label><input type="text" id="rep-sei" placeholder="例：佐藤" oninput="onSeiMei('rep')"></div>
+      <div><label class="L Ls">名（名前）</label><input type="text" id="rep-mei" placeholder="例：花子" oninput="onSeiMei('rep')"></div>
+    </div>
+    <input type="hidden" id="rep-name">
+    <div class="row">
+      <div><label class="L">生年月日</label><input type="date" id="rep-birth"></div>
+      <div><label class="L">性別</label>
+        <select id="rep-gender"><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option></select>
+      </div>
+    </div>
+    <label class="L">レポートの月</label>
+    <select id="rep-month-sel">
+      <option value="today">今月</option>
+      <option value="next">来月</option>
+    </select>
+    <label class="L">重点テーマ</label>
+    <textarea id="rep-focus" rows="2" placeholder="例：恋愛・仕事・健康など気になることを記入"></textarea>
+    <div id="rep-info-box" style="display:none;background:#FFF8F0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">📊 計算済み月運情報</div>
+      <div class="tags" id="rep-tags"></div>
+    </div>
+  </div>
+  <div id="rep-sbox" style="display:none;background:#fff8f0;border:1.5px solid var(--gold-lt);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+    <div style="font-size:.78rem;color:var(--gold);font-weight:600;margin-bottom:6px;">📝 姓名判断（熊崎式五格）</div>
+    <div class="tags" id="rep-stags"></div>
+  </div>
+  <button class="gbtn" id="rep-btn" onclick="genReport()">📊 月運レポートを生成する</button>
+  <div id="rep-ra" style="display:none;margin-top:1rem;">
+    <div class="rbox" id="rep-r"></div>
+    <button class="cbtn" onclick="cp('rep-r')">📋 コピー</button>
+    <p class="note">※月額サービスの月次レポートとして納品できます。</p>
+  </div>
+</div>
+
+</div><!-- /wrap -->
 <script>
-// ══════════════════════════════════════════════
-// 四柱推命 命式計算ライブラリ
-// 基準: 2024/1/1 = 癸丑日（万年暦確認済み）
-// ══════════════════════════════════════════════
-const KAN   = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-const SHI   = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-const KAN_R = ['きのえ','きのと','ひのえ','ひのと','つちのえ','つちのと','かのえ','かのと','みずのえ','みずのと'];
-const SHI_R = ['ね','うし','とら','う','たつ','み','うま','ひつじ','さる','とり','いぬ','い'];
-const GK    = ['木','木','火','火','土','土','金','金','水','水'];
-const GS    = ['水','土','木','木','土','火','火','土','金','金','土','水'];
-const JUSSHIN = ['比肩','劫財','食神','傷官','偏財','正財','偏官','正官','偏印','印綬'];
-const SETSU   = [6,4,6,5,6,6,7,8,8,8,7,7]; // 月の節入り日（概算）
+window.onerror=function(msg,src,line,col,err){
+  const div=document.createElement('div');
+  div.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#c00;color:#fff;padding:8px;font-size:12px;z-index:9999;';
+  div.textContent='エラー: '+msg+' (L'+line+')';
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),8000);
+  return false;
+};
+// ════════════════════════════════════════════════
+// 四柱推命 完全計算ライブラリ
+// ════════════════════════════════════════════════
+const KAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const SHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const KR=['きのえ','きのと','ひのえ','ひのと','つちのえ','つちのと','かのえ','かのと','みずのえ','みずのと'];
+const SR=['ね','うし','とら','う','たつ','み','うま','ひつじ','さる','とり','いぬ','い'];
+const GK=['木','木','火','火','土','土','金','金','水','水'];
+const GS=['水','土','木','木','土','火','火','土','金','金','土','水'];
+const JS=['比肩','劫財','食神','傷官','偏財','正財','偏官','正官','偏印','印綬'];
 
-// ユリウス通算日
-function toJD(y,m,d){ const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3; return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045; }
+// ── 節入り日（精確データ 1990〜2030）──
+const SETSU={
+  1990:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:7,12:7},
+  1991:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  1992:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  1993:{1:5,2:4,3:6,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  1994:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:7,12:7},
+  1995:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  1996:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  1997:{1:5,2:4,3:6,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  1998:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:7,12:7},
+  1999:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2000:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2001:{1:5,2:4,3:5,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2002:{1:5,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:7,12:7},
+  2003:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2004:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2005:{1:5,2:4,3:5,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2006:{1:5,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:7,12:7},
+  2007:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2008:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2009:{1:5,2:4,3:5,4:4,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2010:{1:5,2:4,3:6,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2011:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2012:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2013:{1:5,2:4,3:5,4:4,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2014:{1:5,2:4,3:6,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2015:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2016:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2017:{1:5,2:3,3:5,4:4,5:5,6:6,7:7,8:7,9:7,10:8,11:7,12:7},
+  2018:{1:5,2:4,3:6,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2019:{1:5,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2020:{1:6,2:4,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2021:{1:5,2:3,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2022:{1:5,2:4,3:5,4:5,5:5,6:6,7:7,8:7,9:8,10:8,11:7,12:7},
+  2023:{1:5,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2024:{1:6,2:4,3:5,4:4,5:5,6:5,7:6,8:7,9:7,10:8,11:7,12:7},
+  2025:{1:5,2:3,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2026:{1:5,2:4,3:5,4:4,5:5,6:6,7:7,8:7,9:7,10:8,11:7,12:7},
+  2027:{1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:8,12:7},
+  2028:{1:6,2:4,3:5,4:4,5:5,6:5,7:6,8:7,9:7,10:7,11:7,12:7},
+  2029:{1:5,2:3,3:5,4:4,5:5,6:5,7:7,8:7,9:7,10:8,11:7,12:7},
+  2030:{1:5,2:4,3:5,4:4,5:5,6:6,7:7,8:7,9:7,10:8,11:7,12:7},
+};
+const SETSU_AVG={1:6,2:4,3:6,4:5,5:6,6:6,7:7,8:8,9:8,10:8,11:7,12:7};
 
+function getSetsu(y,m){return (SETSU[y]&&SETSU[y][m])||SETSU_AVG[m];}
+
+// 和暦
+function wr(y){if(y>=2019)return`令和${y-2018}年`;if(y>=1989)return`平成${y-1988}年`;if(y>=1926)return`昭和${y-1925}年`;return`大正${y-1911}年`;}
+// 今日情報
+function today(){const t=new Date(),y=t.getFullYear(),m=t.getMonth()+1,d=t.getDate();return{y,m,d,str:`${y}年${m}月${d}日（${wr(y)}${m}月${d}日）`,ryunen:nenchu(y)};}
+// 流年
+function nenchu(y){const k=((y-4)%10+10)%10,s=((y-4)%12+12)%12;return{k,s,kanji:KAN[k]+SHI[s],wr:wr(y)};}
+// ユリウス日
+function jd(y,m,d){const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;}
 // 年柱
-function calcNen(y){ const k=((y-4)%10+10)%10,s=((y-4)%12+12)%12; return {k,s,kanji:KAN[k]+SHI[s],read:KAN_R[k]+SHI_R[s]}; }
-
+function nenchuP(y){const k=((y-4)%10+10)%10,s=((y-4)%12+12)%12;return{k,s,kanji:KAN[k]+SHI[s],read:KR[k]+SR[s]};}
 // 月柱
-function calcTsuki(y,m,d,nk){
-  let mo=m; if(d<SETSU[m-1]){mo--;if(mo<1)mo=12;}
+function tsukichu(y,m,d,nk){
+  const sd=getSetsu(y,m);
+  let mo=d>=sd?m:m-1; if(mo<1)mo=12;
   const smap=[1,2,3,4,5,6,7,8,9,10,11,0];
   const s=smap[mo-1];
   const base=[2,4,6,8,0][nk%5];
   const k=(base+(s-2+12)%12)%10;
-  return {k,s,kanji:KAN[k]+SHI[s],read:KAN_R[k]+SHI_R[s]};
+  return{k,s,kanji:KAN[k]+SHI[s],read:KR[k]+SR[s]};
 }
-
-// 日柱（2024/1/1=癸丑を基準）
-function calcNichi(y,m,d){
-  const diff=toJD(y,m,d)-toJD(2024,1,1);
-  const k=((9+diff)%10+10)%10, s=((1+diff)%12+12)%12;
-  return {k,s,kanji:KAN[k]+SHI[s],read:KAN_R[k]+SHI_R[s]};
-}
-
+// 日柱（基準:2024/1/1=癸丑）
+function nicchu(y,m,d){const diff=jd(y,m,d)-jd(2024,1,1);const k=((9+diff)%10+10)%10,s=((1+diff)%12+12)%12;return{k,s,kanji:KAN[k]+SHI[s],read:KR[k]+SR[s]};}
 // 時柱
-function calcJi(hour,nk){
-  if(hour===null||hour===''||hour===undefined) return {k:-1,s:-1,kanji:'不明',read:'ふめい'};
-  const h=parseInt(hour);
-  const s=h<1?0:h<3?1:h<5?2:h<7?3:h<9?4:h<11?5:h<13?6:h<15?7:h<17?8:h<19?9:h<21?10:h<23?11:0;
+function jichu(h,nk){
+  if(h===null||h===''||h===undefined)return{k:-1,s:-1,kanji:'不明',read:'ふめい'};
+  const hh=parseInt(h);
+  const s=hh<1?0:hh<3?1:hh<5?2:hh<7?3:hh<9?4:hh<11?5:hh<13?6:hh<15?7:hh<17?8:hh<19?9:hh<21?10:hh<23?11:0;
   const k=([0,2,4,6,8][nk%5]+s)%10;
-  return {k,s,kanji:KAN[k]+SHI[s],read:KAN_R[k]+SHI_R[s]};
+  return{k,s,kanji:KAN[k]+SHI[s],read:KR[k]+SR[s]};
 }
-
 // 十神
-function jusshin(nk,tk){ return JUSSHIN[(tk-nk+10)%10]; }
-
+function jusshin(nk,tk){return JS[(tk-nk+10)%10];}
 // 五行バランス
 function gokyo(nen,tsuki,nichi,ji){
   const b={木:0,火:0,土:0,金:0,水:0};
-  for(const p of [nen,tsuki,nichi,ji]){
-    if(p.k>=0) b[GK[p.k]]++;
-    if(p.s>=0) b[GS[p.s]]++;
-  }
+  for(const p of [nen,tsuki,nichi,ji]){if(p.k>=0)b[GK[p.k]]++;if(p.s>=0)b[GS[p.s]]++;}
   return b;
 }
-
 // 用神判定（簡易）
-function youjin(nichi_k, bal){
-  // 日主の五行
-  const mainG = GK[nichi_k];
-  // 身強身弱：印星・比肩が多いと身強
-  const support = {
-    '木': bal['水']+bal['木'],
-    '火': bal['木']+bal['火'],
-    '土': bal['火']+bal['土'],
-    '金': bal['土']+bal['金'],
-    '水': bal['金']+bal['水']
-  };
-  const total = Object.values(bal).reduce((a,b)=>a+b,0);
-  const ratio = support[mainG] / total;
-  // 用神: 身弱→日主を助ける五行、身強→日主を剋す五行
-  const cycle = ['木','火','土','金','水'];
-  const idx = cycle.indexOf(mainG);
-  if(ratio < 0.4){
-    // 身弱：印星（生じる）と比肩（同じ）が用神
-    return { 強弱:'身弱', 用神:cycle[(idx+4)%5]+'・'+mainG };
-  } else if(ratio > 0.6){
-    // 身強：食傷（洩らす）と財星（剋す）が用神
-    return { 強弱:'身強', 用神:cycle[(idx+1)%5]+'・'+cycle[(idx+2)%5] };
-  } else {
-    return { 強弱:'中和', 用神:'バランス調整' };
+function youjin(nk,bal){
+  const g=GK[nk];const cy=['木','火','土','金','水'];const i=cy.indexOf(g);
+  const sup=bal[cy[(i+4)%5]]+bal[g];const tot=Object.values(bal).reduce((a,b)=>a+b,0);
+  const r=sup/tot;
+  if(r<0.38)return{kj:'身弱',yj:cy[(i+4)%5]+'・'+g};
+  if(r>0.62)return{kj:'身強',yj:cy[(i+1)%5]+'・'+cy[(i+2)%5]};
+  return{kj:'中和',yj:'バランス維持'};
+}
+// 大運計算
+function daiun(by,bm,bd,gender,tk,ts){
+  const nk=((by-4)+400)%10;const isYang=nk%2===0;
+  const fwd=(gender==='男性'&&isYang)||(gender==='女性'&&!isYang)||(gender==='その他'&&isYang);
+  const birth=new Date(by,bm-1,bd);let days=0;
+  if(fwd){for(let i=1;i<=4;i++){let mo=bm+i-1,yr=by;if(mo>12){mo-=12;yr++;}const sd=getSetsu(yr,mo);const s=new Date(yr,mo-1,sd);if(s>birth){days=Math.round((s-birth)/86400000);break;}}}
+  else{for(let i=0;i<=4;i++){let mo=bm-i,yr=by;if(mo<1){mo+=12;yr--;}const sd=getSetsu(yr,mo);const s=new Date(yr,mo-1,sd);if(s<=birth){days=Math.round((birth-s)/86400000);break;}}}
+  const sa=Math.floor(days/3);
+  const td=new Date();const ca=td.getFullYear()-by-(td<new Date(td.getFullYear(),bm-1,bd)?1:0);
+  const list=[];
+  for(let i=0;i<10;i++){
+    const age=sa+i*10,yr=by+age;
+    let k,s;
+    if(fwd){k=(tk+1+i)%10;s=(ts+1+i)%12;}
+    else{k=(tk-1-i+100)%10;s=(ts-1-i+120)%12;}
+    list.push({age,yr,kanji:KAN[k]+SHI[s],k,s,cur:ca>=age&&ca<age+10});
   }
+  return list;
 }
-
 // 全命式計算
-function calcMeshiki(y,m,d,hour){
-  const nen  =calcNen(y);
-  const tsuki=calcTsuki(y,m,d,nen.k);
-  const nichi=calcNichi(y,m,d);
-  const ji   =calcJi(hour,nichi.k);
-  const bal  =gokyo(nen,tsuki,nichi,ji);
-  const yj   =youjin(nichi.k,bal);
-  // 十神
-  const js = {
-    年干: jusshin(nichi.k, nen.k),
-    月干: jusshin(nichi.k, tsuki.k),
-    時干: ji.k>=0 ? jusshin(nichi.k, ji.k) : '不明',
+function meshiki(y,m,d,h,gender){
+  const nen=nenchuP(y);const tsuki=tsukichu(y,m,d,nen.k);const nichi=nicchu(y,m,d);const ji=jichu(h,nichi.k);
+  const bal=gokyo(nen,tsuki,nichi,ji);const yj=youjin(nichi.k,bal);
+  const dl=daiun(y,m,d,gender||'女性',tsuki.k,tsuki.s);
+  const js={年干:jusshin(nichi.k,nen.k),月干:jusshin(nichi.k,tsuki.k),時干:ji.k>=0?jusshin(nichi.k,ji.k):'不明'};
+  const curD=dl.find(d=>d.cur)||dl[0];
+  return{nen,tsuki,nichi,ji,bal,yj,dl,js,curD};
+}
+
+// ── UI更新 ──
+function showMeshiki(px,m){
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set(px+'-nk',m.nen.kanji);set(px+'-nr',m.nen.read);
+  set(px+'-tk',m.tsuki.kanji);set(px+'-tr',m.tsuki.read);
+  set(px+'-dk',m.nichi.kanji);set(px+'-dr',m.nichi.read);
+  set(px+'-jk',m.ji.kanji);set(px+'-jr',m.ji.read);
+  const gk=document.getElementById(px+'-gk');
+  if(gk){gk.innerHTML=Object.entries(m.bal).map(([k,v])=>`<span class="tag">${k}：${v}</span>`).join('')+`<span class="tag g">日主：${m.nichi.kanji[0]}（${m.yj.kj}）</span><span class="tag g">用神：${m.yj.yj}</span>`;}
+  const dl=document.getElementById(px+'-dl');
+  if(dl){dl.innerHTML='<b style="font-size:.75rem;color:var(--gold)">大運：</b><br>'+m.dl.slice(0,8).map(d=>`<span class="${d.cur?'cur':''}">${d.age}歳〜${d.kanji}（${d.yr}年/${wr(d.yr)}）${d.cur?'　★現在':''}</span><br>`).join('');}
+  const box=document.getElementById(px+'-mbox');if(box)box.style.display='block';
+}
+function onBirth(px){
+  const b=document.getElementById(px+'-birth')?.value;const t=document.getElementById(px+'-time')?.value;const g=document.getElementById(px+'-gender')?.value;
+  if(!b)return;
+  const d=new Date(b);const h=t?parseInt(t.split(':')[0]):null;
+  const m=meshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),h,g);
+  showMeshiki(px,m);
+}
+
+// ══════════════════════════════════════
+// 姓名判断（熊崎式）完全辞書
+// ══════════════════════════════════════
+const KAKU={
+  '一':1,'乙':1,'乃':1,
+  '二':2,'人':2,'入':2,'八':2,'刀':2,'力':2,'十':2,'丁':2,'七':7,'九':9,'又':2,
+  '三':3,'山':3,'川':3,'土':3,'大':3,'小':3,'上':3,'下':3,'口':3,'子':3,'女':3,'万':3,'己':3,'干':3,'弓':3,'工':3,'才':3,'千':3,'丈':3,'久':3,
+  '四':4,'中':4,'天':4,'元':4,'心':4,'木':4,'水':4,'火':4,'田':5,'日':4,'月':4,'手':4,'文':4,'友':4,'太':4,'仁':4,'化':4,'今':4,'公':4,'内':4,'分':4,'方':4,'毛':4,'牛':4,'王':4,'不':4,'父':4,'戸':4,'止':4,'少':4,'斗':4,'介':4,'丑':4,
+  '五':5,'白':5,'玉':5,'生':5,'立':5,'石':5,'本':5,'正':5,'平':5,'史':5,'世':5,'冬':5,'北':5,'央':5,'加':5,'可':5,'古':5,'右':5,'司':5,'田':5,'外':5,'左':5,'失':5,'用':5,'由':5,'甲':5,'矢':5,'礼':5,'穴':5,'示':5,'弘':5,'以':5,'仙':5,
+  '六':6,'光':6,'名':6,'字':6,'合':6,'同':6,'有':6,'多':6,'年':6,'米':6,'羽':6,'衣':6,'全':6,'朱':6,'江':6,'池':6,'竹':6,'糸':6,'色':6,'行':6,'西':6,'伊':6,'吉':6,'在':6,'地':6,'好':6,'安':6,'宅':6,'存':6,'寺':6,'式':6,'机':6,'気':6,'汗':6,'灰':6,'先':6,'旭':6,'曲':6,'当':6,'仲':6,'休':6,'会':6,'成':6,'任':6,'伝':6,'仮':6,'件':6,'仕':6,'他':6,'付':6,'代':6,'令':6,'汐':6,'凪':6,'朗':6,
+  '七':7,'花':7,'見':7,'赤':7,'里':7,'村':7,'男':7,'志':7,'孝':7,'希':7,'形':7,'条':7,'弟':7,'作':7,'位':7,'住':7,'佐':7,'何':7,'余':7,'克':7,'別':7,'利':7,'助':7,'努':7,'労':7,'君':7,'完':7,'官':7,'忘':7,'技':7,'杉':7,'束':7,'材':7,'沢':7,'坂':7,'近':7,'李':7,'杏':7,'谷':7,'那':7,'寿':7,
+  '八':8,'明':8,'金':8,'国':8,'青':8,'林':8,'岡':8,'幸':8,'東':8,'和':8,'依':8,'昌':8,'知':8,'佳':8,'典':8,'固':8,'岸':8,'岩':8,'居':8,'往':8,'忠':8,'念':8,'性':8,'所':8,'拡':8,'担':8,'拠':8,'招':8,'承':8,'放':8,'昇':8,'板':8,'松':8,'枝':8,'服':8,'法':8,'河':8,'炎':8,'物':8,'的':8,'直':8,'祈':8,'空':8,'肩':8,'育':8,'武':8,'河':8,'宜':8,'奈':8,'茉':8,'芽':8,'実':8,'泳':8,'欧':8,'果':8,'旺':8,
+  '九':9,'春':9,'南':9,'美':9,'前':9,'星':9,'風':9,'香':9,'奏':9,'柔':9,'映':9,'則':9,'勇':9,'勉':9,'厚':9,'咲':9,'品':9,'客':9,'室':9,'宥':9,'建':9,'律':9,'思':9,'怒':9,'急':9,'指':9,'持':9,'政':9,'故':9,'泉':9,'洗':9,'活':9,'派':9,'洞':9,'点':9,'独':9,'界':9,'発':9,'相':9,'省':9,'看':9,'研':9,'秋':9,'突':9,'紀':9,'紅':9,'茂':9,'草':9,'計':9,'軍':9,'追':9,'重':9,'乗':9,'亮':9,'虹':9,'洸':9,'洋':9,
+  '十':2,
+  '晴':12,'博':12,'満':12,'絵':12,'智':12,'葵':12,'景':12,'翔':12,'陽':12,'湖':12,'瑞':13,'湊':12,'渚':11,
+  '愛':13,'義':13,'道':13,'睦':13,'詩':13,'煌':13,'蓮':13,'楓':13,'蒼':13,'鼓':13,'誠':13,'聖':13,'鈴':13,'源':13,'琴':13,'稜':13,
+  '樹':16,'龍':16,'橋':16,'凛':15,'穂':15,'瑠':14,'璃':15,'優':17,'彩':11,'萌':11,'葉':12,'凌':10,'渓':11,
+  '桜':10,'家':10,'時':10,'真':10,'原':10,'夏':10,'恵':10,'素':10,'倉':10,'哲':10,'桂':10,'桃':10,'梅':11,'清':11,'雅':11,'健':11,'菜':11,'淳':11,'彩':11,'理':11,'望':11,'梨':11,'海':9,'幸':8,
+  '田':5,'中':4,'山':3,'川':3,'木':4,'林':8,'森':12,'村':7,'本':5,'高':10,'小':3,'大':3,'上':3,'下':3,'原':10,'野':11,'島':10,
+  '藤':18,'渡':12,'辺':5,'佐':7,'松':8,'石':5,'西':6,'岩':8,'内':4,'土':3,'長':8,'沢':7,'加':5,
+  '亜':7,'瑛':12,'杏':7,'梓':11,'綾':14,'泉':9,'英':8,'江':6,'延':8,'奥':12,
+  '子':3,'朗':10,'郎':9,'介':4,'三':3,'実':8,'啓':11,'敦':12,'徹':15,'剛':10,'豊':13,'賢':16,'治':8,'倫':10,'敏':10,'茂':8,'茜':9,'泰':10,'澄':15,'純':10,'温':12,'涼':11,'晃':10,
+  '翼':17,'瑠':14,'琉':11,'朱':6,'蒼':13,
+  '慶':15,'嘉':14,'禎':13,'稼':15,'濱':17,'浜':10,
+  '悠':11,'遥':12,'遼':15,'稜':13,'湖':12,'環':17,'珠':10,
+  '莉':10,'紗':10,'沙':7,'桐':10,'菖':11,'萌':11,
+  '壮':6,'宏':7,'勲':15,'績':17,'輝':15,'絹':13,'緒':14,'蔵':15,
+  '誉':13,'輔':14,'廉':13,'廣':15,'應':17,
+  '太':4,'和':8,'春':9,'夏':10,'秋':9,'冬':5,
+};
+const KIKKYO={1:'大吉',2:'凶',3:'大吉',4:'凶',5:'大吉',6:'吉',7:'吉',8:'大吉',9:'凶',10:'凶',11:'大吉',12:'凶',13:'大吉',14:'凶',15:'大吉',16:'大吉',17:'吉',18:'大吉',19:'凶',20:'凶',21:'大吉',22:'凶',23:'大吉',24:'大吉',25:'吉',26:'凶',27:'吉',28:'凶',29:'大吉',30:'凶',31:'大吉',32:'大吉',33:'大吉',34:'凶',35:'吉',36:'凶',37:'吉',38:'吉',39:'大吉',40:'凶',41:'大吉',42:'凶',43:'吉',44:'凶',45:'大吉',46:'凶',47:'吉',48:'大吉',49:'凶',50:'凶',51:'吉',52:'大吉',53:'凶',54:'凶',55:'吉',56:'凶',57:'吉',58:'大吉',59:'凶',60:'凶',61:'大吉',62:'凶',63:'吉',64:'凶',65:'大吉',66:'凶',67:'吉',68:'大吉',69:'凶',70:'凶',71:'吉',72:'大吉',73:'大吉',74:'凶',75:'吉',76:'凶',77:'大吉',78:'大吉',79:'凶',80:'凶',81:'大吉'};
+
+function kaku(c){return KAKU[c]||0;}
+function kk(n){n=((n-1)%81)+1;return KIKKYO[n]||'吉';}
+
+function calcSeimei(sei,mei){
+  if(!sei||!mei)return null;
+  const sa=[...sei],ma=[...mei];
+  const ss=sa.reduce((a,c)=>a+kaku(c),0);
+  const ms=ma.reduce((a,c)=>a+kaku(c),0);
+  const tenkaku=ss;
+  const jinkaku=kaku(sa[sa.length-1])+kaku(ma[0]);
+  const chikaku=ms;
+  const sougaku=ss+ms;
+  const gaikaku=sougaku-jinkaku;
+  const unk=[...sa,...ma].filter(c=>!KAKU[c]);
+  return{
+    '天格':{n:tenkaku,kk:kk(tenkaku)},
+    '人格':{n:jinkaku,kk:kk(jinkaku)},
+    '地格':{n:chikaku,kk:kk(chikaku)},
+    '外格':{n:gaikaku,kk:kk(gaikaku)},
+    '総格':{n:sougaku,kk:kk(sougaku)},
+    unk,sei,mei
   };
-  return {nen,tsuki,nichi,ji,bal,yj,js};
 }
 
-// ── 命式をUIに表示 ──
-function showMeshiki(prefix, m){
-  ['nen','tsuki','nichi','ji'].forEach(p=>{
-    document.getElementById(`${prefix}-${p}-k`).textContent = m[p].kanji;
-    document.getElementById(`${prefix}-${p}-r`).textContent = m[p].read;
-  });
-  const gokyoEl = document.getElementById(`${prefix}-gokyo`);
-  gokyoEl.innerHTML = Object.entries(m.bal).map(([k,v])=>
-    `<span class="gokyo-tag">${k}：${v}</span>`).join('') +
-    `<span class="gokyo-tag" style="background:#FFF0E8;border-color:var(--gold)">日主：${m.nichi.kanji[0]}（${m.yj.強弱}）</span>` +
-    `<span class="gokyo-tag" style="background:#FFF0E8;border-color:var(--gold)">用神：${m.yj.用神}</span>`;
-  document.getElementById(`${prefix}-meshiki-box`).style.display = 'block';
-}
-
-function updateMeshiki(){
-  const birth=document.getElementById('s-birth').value;
-  const time =document.getElementById('s-time').value;
-  if(!birth) return;
-  const d=new Date(birth);
-  const m=calcMeshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),time||null);
-  showMeshiki('s',m);
-}
-
-function updateAishoMeshiki(){
-  const ab=document.getElementById('a-birth').value;
-  const at=document.getElementById('a-time').value;
-  const bb=document.getElementById('b-birth').value;
-  const bt=document.getElementById('b-time').value;
-  if(ab){ const d=new Date(ab); showMeshiki('a',calcMeshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),at||null)); }
-  if(bb){ const d=new Date(bb); showMeshiki('b',calcMeshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),bt||null)); }
-}
-
-// ══ フォーム回答パーサー ══
-// Googleスプシからコピーした文字列を自動解析
-function parseLine(text, keywords){
-  const lines = text.split(/\n/);
-  for(const line of lines){
-    for(const kw of keywords){
-      if(line.includes(kw)){
-        const parts = line.split(/\t|：|:/);
-        if(parts.length > 1) return parts.slice(1).join(':').trim();
-      }
+function onSeiMei(px){
+  const sei=document.getElementById(px+'-sei')?.value.trim()||'';
+  const mei=document.getElementById(px+'-mei')?.value.trim()||'';
+  const ne=document.getElementById(px+'-name');if(ne)ne.value=sei+mei;
+  if(sei&&mei){
+    const g=calcSeimei(sei,mei);
+    const box=document.getElementById(px+'-sbox');
+    const tags=document.getElementById(px+'-stags');
+    if(box&&tags&&g){
+      const cm={'大吉':'ok','吉':'warn','凶':'ng'};
+      tags.innerHTML=Object.entries({'天格':g['天格'],'人格':g['人格'],'地格':g['地格'],'外格':g['外格'],'総格':g['総格']}).map(([k,v])=>`<span class="tag ${cm[v.kk]||''}">${k}：${v.n}画（${v.kk}）</span>`).join('');
+      if(g.unk.length>0)tags.innerHTML+=`<br><span style="font-size:.72rem;color:var(--text3)">⚠️「${g.unk.join('')}」は辞書未登録のためAIが画数を確認します</span>`;
+      box.style.display='block';
     }
   }
-  return '';
 }
 
-function parseDate(str){
-  // 様々な日付フォーマットに対応
-  const m = str.match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/);
-  if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
-  return '';
+// ── フォーム回答パーサー ──
+function pLine(txt,keys){
+  for(const line of txt.split(/[\n\r]+/)){for(const kw of keys){if(line.includes(kw)){const t=line.split('\t');if(t.length>1)return t[t.length-1].trim();const c=line.split(/[：:]/);if(c.length>1)return c.slice(1).join(':').trim();}}}
+  return'';
 }
+function pDate(s){if(!s)return'';const m=s.match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/);return m?`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`:'';
+}
+function setVal(id,v){const e=document.getElementById(id);if(e&&v)e.value=v;}
+function setSel(id,v){if(!v)return;const e=document.getElementById(id);if(!e)return;[...e.options].forEach(o=>{if(v.includes(o.value.slice(0,3)))e.value=o.value;});}
 
-function parseShinchPaste(){
-  const text = document.getElementById('s-paste').value;
-  if(!text.trim()){ alert('回答を貼り付けてください'); return; }
-
-  const name   = parseLine(text,['お名前','名前','ニックネーム']);
-  const birth  = parseDate(parseLine(text,['生年月日','誕生日','生まれ'])||text);
-  const time   = parseLine(text,['出生時刻','時刻','生まれた時間']);
-  const gender = parseLine(text,['性別']);
-  const theme  = parseLine(text,['相談テーマ','テーマ','相談内容']);
-  const memo   = parseLine(text,['悩み','状況','ご相談','詳しく']);
-  const origin = parseLine(text,['出身','育った','生まれた場所']);
-  const job    = parseLine(text,['仕事','職業','生活']);
-  const past   = parseLine(text,['転機','出来事','過去']);
-
-  if(name)   document.getElementById('s-name').value   = name;
-  if(birth)  { document.getElementById('s-birth').value = birth; }
-  if(time)   document.getElementById('s-time').value   = time.replace(/[^0-9:]/g,'').slice(0,5);
-  if(gender) {
-    const sel = document.getElementById('s-gender');
-    [...sel.options].forEach(o=>{ if(gender.includes(o.value)) sel.value=o.value; });
+function doPaste(px){
+  const txt=document.getElementById(px+'-paste')?.value||'';
+  if(!txt.trim()){alert('回答を貼り付けてください');return;}
+  if(px==='s'){
+    const sei=pLine(txt,['姓','苗字']);const mei=pLine(txt,['名前','名（']);
+    const nm=pLine(txt,['お名前','名前','ニックネーム']);
+    if(sei)setVal('s-sei',sei); if(mei)setVal('s-mei',mei);
+    if(!sei&&!mei&&nm){setVal('s-sei',nm);} // フルネームのみの場合
+    const birth=pDate(pLine(txt,['生年月日','誕生日'])||txt);
+    const time=pLine(txt,['出生時刻','時刻']);
+    if(birth)setVal('s-birth',birth);
+    if(time)setVal('s-time',time.replace(/[^0-9:]/g,'').slice(0,5));
+    setSel('s-gender',pLine(txt,['性別']));
+    setSel('s-theme',pLine(txt,['相談テーマ','テーマ']));
+    setVal('s-memo',pLine(txt,['悩み','状況','ご相談']));
+    setVal('s-origin',pLine(txt,['出身','育った']));
+    setVal('s-job',pLine(txt,['仕事','職業','生活']));
+    setVal('s-past',pLine(txt,['転機','出来事','過去']));
+    onSeiMei('s');if(birth)onBirth('s');
+  }else if(px==='t'){
+    setVal('t-name',pLine(txt,['お名前','名前']));
+    setSel('t-hand',pLine(txt,['診断する手','利き手']));
+    setSel('t-theme',pLine(txt,['相談テーマ','テーマ']));
+    setVal('t-memo',pLine(txt,['悩み','状況']));
+  }else{
+    const aSei=pLine(txt,['あなたの姓','Aさんの姓']);const aMei=pLine(txt,['あなたの名','Aさんの名']);
+    const bSei=pLine(txt,['お相手の姓','Bさんの姓']);const bMei=pLine(txt,['お相手の名','Bさんの名']);
+    if(aSei)setVal('a-sei',aSei);if(aMei)setVal('a-mei',aMei);
+    if(bSei)setVal('b-sei',bSei);if(bMei)setVal('b-mei',bMei);
+    const aB=pDate(pLine(txt,['あなたの生年月日','Aさんの生年月日'])||'');
+    const bB=pDate(pLine(txt,['お相手の生年月日','Bさんの生年月日'])||'');
+    if(aB){setVal('a-birth',aB);const at=pLine(txt,['あなたの出生時刻']);if(at)setVal('a-time',at.replace(/[^0-9:]/g,'').slice(0,5));setSel('a-gender',pLine(txt,['あなたの性別']));onBirth('a');}
+    if(bB){setVal('b-birth',bB);const bt=pLine(txt,['お相手の出生時刻']);if(bt)setVal('b-time',bt.replace(/[^0-9:]/g,'').slice(0,5));setSel('b-gender',pLine(txt,['お相手の性別']));onBirth('b');}
+    setSel('ab-rel',pLine(txt,['お二人の関係','関係']));
+    setSel('ab-theme',pLine(txt,['相談テーマ','テーマ']));
+    setVal('ab-memo',pLine(txt,['悩み','状況']));
+    onSeiMei('a');onSeiMei('b');
   }
-  if(theme){
-    const sel = document.getElementById('s-theme');
-    [...sel.options].forEach(o=>{ if(theme.includes(o.value.slice(0,3))) sel.value=o.value; });
-  }
-  if(memo)   document.getElementById('s-memo').value   = memo;
-  if(origin) document.getElementById('s-origin').value = origin;
-  if(job)    document.getElementById('s-job').value    = job;
-  if(past)   document.getElementById('s-past').value   = past;
-
-  // 命式を自動更新
-  if(birth) updateMeshiki();
-
   alert('✅ 回答を読み込みました！内容を確認してください。');
 }
 
-function parseTesouPaste(){
-  const text = document.getElementById('t-paste').value;
-  if(!text.trim()){ alert('回答を貼り付けてください'); return; }
-  const name  = parseLine(text,['お名前','名前']);
-  const hand  = parseLine(text,['診断する手','利き手','手']);
-  const theme = parseLine(text,['相談テーマ','テーマ']);
-  const memo  = parseLine(text,['悩み','状況','ご相談']);
-  if(name)  document.getElementById('t-name').value  = name;
-  if(hand){
-    const sel = document.getElementById('t-hand');
-    [...sel.options].forEach(o=>{ if(hand.includes(o.value)) sel.value=o.value; });
-  }
-  if(theme){
-    const sel = document.getElementById('t-theme');
-    [...sel.options].forEach(o=>{ if(theme.includes(o.value.slice(0,2))) sel.value=o.value; });
-  }
-  if(memo) document.getElementById('t-memo').value = memo;
-  alert('✅ 回答を読み込みました！写真を追加してから生成してください。');
-}
-
-function parseAishoPaste(){
-  const text = document.getElementById('ab-paste').value;
-  if(!text.trim()){ alert('回答を貼り付けてください'); return; }
-  // Aさん
-  const aName  = parseLine(text,['あなたのお名前','Aさん','お名前']);
-  const aBirth = parseDate(parseLine(text,['あなたの生年月日','Aさんの生年月日'])||'');
-  const aTime  = parseLine(text,['あなたの出生時刻','Aさんの時刻']);
-  const aGend  = parseLine(text,['あなたの性別','Aさんの性別']);
-  // Bさん
-  const bName  = parseLine(text,['お相手のお名前','Bさん','相手のお名前']);
-  const bBirth = parseDate(parseLine(text,['お相手の生年月日','Bさんの生年月日'])||'');
-  const bTime  = parseLine(text,['お相手の出生時刻','Bさんの時刻']);
-  const bGend  = parseLine(text,['お相手の性別','Bさんの性別']);
-  const rel    = parseLine(text,['お二人の関係','関係']);
-  const theme  = parseLine(text,['相談テーマ','テーマ']);
-  const memo   = parseLine(text,['悩み','状況','ご相談']);
-
-  if(aName)  document.getElementById('a-name').value  = aName;
-  if(aBirth) document.getElementById('a-birth').value = aBirth;
-  if(aTime)  document.getElementById('a-time').value  = aTime.replace(/[^0-9:]/g,'').slice(0,5);
-  if(bName)  document.getElementById('b-name').value  = bName;
-  if(bBirth) document.getElementById('b-birth').value = bBirth;
-  if(bTime)  document.getElementById('b-time').value  = bTime.replace(/[^0-9:]/g,'').slice(0,5);
-  if(rel){ const s=document.getElementById('ab-rel'); [...s.options].forEach(o=>{if(rel.includes(o.value.slice(0,3)))s.value=o.value;}); }
-  if(theme){ const s=document.getElementById('ab-theme'); [...s.options].forEach(o=>{if(theme.includes(o.value.slice(0,3)))s.value=o.value;}); }
-  if(memo) document.getElementById('ab-memo').value = memo;
-  updateAishoMeshiki();
-  alert('✅ 回答を読み込みました！');
-}
-
-// ══ APIキー ══
-function toggleApi(){
-  const s=document.getElementById('api-section'),i=document.getElementById('api-toggle-icon');
-  const open=s.classList.contains('visible');
-  s.classList.toggle('visible',!open); i.textContent=open?'▶':'▼';
-}
-function saveApiKey(){
-  const k=document.getElementById('api-key').value.trim();
-  if(!k){alert('APIキーを入力してください');return;}
-  localStorage.setItem('uranai_api_key',k);
-  const st=document.getElementById('api-status'); st.style.display='block'; st.textContent='✓ APIキーを保存しました';
-}
-function getApiKey(){
-  const k=document.getElementById('api-key').value.trim()||localStorage.getItem('uranai_api_key');
-  if(!k){alert('APIキーを入力・保存してください');return null;}
-  return k;
-}
+// ── APIキー ──
+function toggleApi(){const b=document.getElementById('api-box'),i=document.getElementById('api-ic'),o=b.classList.contains('show');b.classList.toggle('show',!o);i.textContent=o?'▶':'▼';}
+function saveKey(){const k=document.getElementById('api-key').value.trim();if(!k){alert('APIキーを入力してください');return;}localStorage.setItem('uk',k);const s=document.getElementById('api-ok');s.style.display='block';s.textContent='✓ 保存しました';}
+function getKey(){const k=document.getElementById('api-key').value.trim()||localStorage.getItem('uk');if(!k){alert('APIキーを入力・保存してください');return null;}return k;}
 window.onload=function(){
-  const s=localStorage.getItem('uranai_api_key');
-  if(s){document.getElementById('api-key').value=s;document.getElementById('api-status').style.display='block';}
-  else{document.getElementById('api-section').classList.add('visible');document.getElementById('api-toggle-icon').textContent='▼';}
-};
+  // 開運日カレンダーのデフォルト月を今月に
+  const now=new Date();
+  const calMonth=document.getElementById('cal-month');
+  if(calMonth)calMonth.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const s=localStorage.getItem('uk');if(s){document.getElementById('api-key').value=s;document.getElementById('api-ok').style.display='block';}else{document.getElementById('api-box').classList.add('show');document.getElementById('api-ic').textContent='▼';}};
 
-// ══ タブ ══
-function switchTab(t){
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
-  const tabs={'shichu':0,'tesou':1,'aisho':2};
-  document.querySelectorAll('.tab')[tabs[t]].classList.add('active');
-  document.getElementById('panel-'+t).classList.add('active');
-}
+// ── タブ ──
+function tab(t){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));const m={s:0,t:1,ab:2,num:3,kyu:4,tar:5,cal:6,rep:7};document.querySelectorAll('.tab')[m[t]].classList.add('on');document.getElementById('pane-'+t).classList.add('on');}
 
-// ══ 画像プレビュー ══
-function previewImg(e,prevId,nextId,btnId){
-  const f=e.target.files[0]; if(!f)return;
-  const r=new FileReader(); r.onload=ev=>{
-    const img=document.getElementById(prevId); img.src=ev.target.result; img.style.display='block';
-    if(nextId)document.getElementById(nextId).style.display='block';
-    if(btnId)document.getElementById(btnId).disabled=false;
-  }; r.readAsDataURL(f);
-}
-function previewImg2(e){
-  const f=e.target.files[0]; if(!f)return;
-  const r=new FileReader(); r.onload=ev=>{const img=document.getElementById('t-prev2');img.src=ev.target.result;img.style.display='block';}; r.readAsDataURL(f);
-}
+// ── 画像 ──
+function prevImg(e,pid,nid,bid){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const i=document.getElementById(pid);i.src=ev.target.result;i.style.display='block';if(nid)document.getElementById(nid).style.display='block';if(bid)document.getElementById(bid).disabled=false;};r.readAsDataURL(f);}
+function prevImg2(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const i=document.getElementById('t-p2');i.src=ev.target.result;i.style.display='block';};r.readAsDataURL(f);}
 
-// ══ GASスプレッドシート保存 ══
-const GAS_URL='https://script.google.com/macros/s/AKfycbyLNAjtrdrzfJqZyfbsTwOWANswwEADiRhoq0wttFhjO7rLN-bjKltav0fTYoQcA7Pyyw/exec';
-function saveToSheet(type,name,birth,theme,result){
+// ── GAS保存 ──
+const GAS='https://script.google.com/macros/s/AKfycbyLNAjtrdrzfJqZyfbsTwOWANswwEADiRhoq0wttFhjO7rLN-bjKltav0fTYoQcA7Pyyw/exec';
+function saveGAS(type,name,birth,theme,result){
   try{
-    // 非表示iframeにフォームをPOST送信（CORS完全回避）
-    let iframe=document.getElementById('_gas_iframe');
-    if(!iframe){
-      iframe=document.createElement('iframe');
-      iframe.id='_gas_iframe';
-      iframe.name='_gas_iframe';
-      iframe.style.cssText='display:none;width:0;height:0;border:0;';
-      document.body.appendChild(iframe);
-    }
-    const form=document.createElement('form');
-    form.method='POST';
-    form.action=GAS_URL;
-    form.target='_gas_iframe';
-    form.style.display='none';
-    const field=document.createElement('input');
-    field.type='hidden';
-    field.name='payload';
-    field.value=JSON.stringify({type,name,birth,theme,result});
-    form.appendChild(field);
-    document.body.appendChild(form);
-    form.submit();
-    setTimeout(()=>{if(form.parentNode)document.body.removeChild(form);},3000);
-    console.log('スプレッドシートに送信しました');
-  }catch(e){console.warn('保存エラー:',e);}
+    let iframe=document.getElementById('_gif');
+    if(!iframe){iframe=document.createElement('iframe');iframe.id='_gif';iframe.name='_gif';iframe.style.cssText='display:none;width:0;height:0;border:0;';document.body.appendChild(iframe);}
+    const form=document.createElement('form');form.method='POST';form.action=GAS;form.target='_gif';form.style.display='none';
+    const f=document.createElement('input');f.type='hidden';f.name='payload';f.value=JSON.stringify({type,name,birth,theme,result});form.appendChild(f);
+    document.body.appendChild(form);form.submit();setTimeout(()=>{if(form.parentNode)document.body.removeChild(form);},3000);
+  }catch(e){console.warn(e);}
 }
 
-// ══ APIコール ══
-async function callAPI(prompt, maxTokens=16000){
-  const apiKey=getApiKey(); if(!apiKey)return null;
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
-  });
-  const data=await res.json();
-  if(data.error)throw new Error(data.error.message);
-  return data.content?.map(c=>c.text||'').join('')||'';
+// ── API呼び出し ──
+async function callAPI(msgs,max=16000){
+  const k=getKey();if(!k)return null;
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:max,messages:msgs})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);
+  return d.content?.map(c=>c.text||'').join('')||'';
 }
-
-async function callAPIWithImage(prompt, images, maxTokens=16000){
-  const apiKey=getApiKey(); if(!apiKey)return null;
-  const content=[...images.map(img=>({type:'image',source:{type:'base64',media_type:img.type,data:img.data}})),{type:'text',text:prompt}];
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:maxTokens,messages:[{role:'user',content}]})
-  });
-  const data=await res.json();
-  if(data.error)throw new Error(data.error.message);
-  return data.content?.map(c=>c.text||'').join('')||'';
+async function callAPIImg(prompt,imgs,max=16000){
+  const k=getKey();if(!k)return null;
+  const content=[...imgs.map(i=>({type:'image',source:{type:'base64',media_type:i.type,data:i.data}})),{type:'text',text:prompt}];
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:max,messages:[{role:'user',content}]})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);
+  return d.content?.map(c=>c.text||'').join('')||'';
 }
 
 // ══ 四柱推命 生成 ══
-async function generateShichu(){
-  const apiKey=getApiKey(); if(!apiKey)return;
-  const name  =document.getElementById('s-name').value.trim()||'お客様';
-  const birth =document.getElementById('s-birth').value;
-  const time  =document.getElementById('s-time').value;
+async function genShichu(){
+  const k=getKey();if(!k)return;
+  const sei=document.getElementById('s-sei').value.trim();
+  const mei=document.getElementById('s-mei').value.trim();
+  const name=(sei+mei)||document.getElementById('s-name').value.trim()||'お客様';
+  const birth=document.getElementById('s-birth').value;
+  const time=document.getElementById('s-time').value;
   const gender=document.getElementById('s-gender').value;
-  const theme =document.getElementById('s-theme').value;
-  const memo  =document.getElementById('s-memo').value.trim();
+  const theme=document.getElementById('s-theme').value;
+  const memo=document.getElementById('s-memo').value.trim();
   const origin=document.getElementById('s-origin').value.trim();
-  const job   =document.getElementById('s-job').value.trim();
-  const past  =document.getElementById('s-past').value.trim();
+  const job=document.getElementById('s-job').value.trim();
+  const past=document.getElementById('s-past').value.trim();
   if(!birth){alert('生年月日を入力してください');return;}
 
-  const btn=document.getElementById('s-btn');
-  btn.disabled=true; btn.textContent='生成中...';
-  const resultArea=document.getElementById('s-result-area');
-  const resultBox=document.getElementById('s-result');
-  resultArea.style.display='block';
-  resultBox.className='result-box loading';
-  resultBox.textContent='本格鑑定書を生成中です（約1〜2分）...';
+  const btn=document.getElementById('s-btn');btn.disabled=true;btn.textContent='生成中...';
+  document.getElementById('s-ra').style.display='block';
+  const rb=document.getElementById('s-r');rb.className='rbox loading';rb.textContent='本格鑑定書を生成中です（約1〜2分）...';
 
-  const d=new Date(birth);
-  const today=new Date();
-  let age=today.getFullYear()-d.getFullYear();
-  if(today.getMonth()-d.getMonth()<0||(today.getMonth()-d.getMonth()===0&&today.getDate()<d.getDate()))age--;
-
-  const m=calcMeshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),time?parseInt(time.split(':')[0]):null);
+  const d=new Date(birth);const td=today();
+  let age=td.y-d.getFullYear();
+  if(td.m<d.getMonth()+1||(td.m===d.getMonth()+1&&td.d<d.getDate()))age--;
+  const h=time?parseInt(time.split(':')[0]):null;
+  const m=meshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),h,gender);
   showMeshiki('s',m);
 
-  // 姓名判断計算
-  const sei = document.getElementById('s-sei')?.value.trim()||'';
-  const mei = document.getElementById('s-mei')?.value.trim()||'';
-  let seimeiStr = '';
-  if(sei && mei){
-    const g = calcGogaku(sei, mei);
-    if(g) seimeiStr = `\n【姓名判断（熊崎式五格）】\n` +
-      `天格：${g.tenkaku.n}画（${g.tenkaku.kk}）　人格：${g.jinkaku.n}画（${g.jinkaku.kk}）　地格：${g.chikaku.n}画（${g.chikaku.kk}）\n` +
-      `外格：${g.gaikaku.n}画（${g.gaikaku.kk}）　総格：${g.sougaku.n}画（${g.sougaku.kk}）`;
-  }
+  // 姓名判断
+  const sg=sei&&mei?calcSeimei(sei,mei):null;
+  const seimeiStr=sg?`\n【姓名判断（熊崎式五格・計算済み・変更禁止）】\n天格：${sg['天格'].n}画（${sg['天格'].kk}）　人格：${sg['人格'].n}画（${sg['人格'].kk}）　地格：${sg['地格'].n}画（${sg['地格'].kk}）\n外格：${sg['外格'].n}画（${sg['外格'].kk}）　総格：${sg['総格'].n}画（${sg['総格'].kk}）${sg.unk.length?'\n⚠️未登録文字：「'+sg.unk.join('')+'」→正確な画数をAIが確認します':''}`:'';
 
-  const meshikiStr=`年柱：${m.nen.kanji}（${m.nen.read}）／月柱：${m.tsuki.kanji}（${m.tsuki.read}）／日柱：${m.nichi.kanji}（${m.nichi.read}）／時柱：${m.ji.kanji}（${m.ji.read}）`;
-  const gokyoStr=Object.entries(m.bal).map(([k,v])=>`${k}${v}`).join(' ');
+  const ms=`年柱：${m.nen.kanji}（${m.nen.read}）　月柱：${m.tsuki.kanji}（${m.tsuki.read}）　日柱：${m.nichi.kanji}（${m.nichi.read}）　時柱：${m.ji.kanji}（${m.ji.read}）`;
+  const gs=Object.entries(m.bal).map(([k,v])=>`${k}${v}`).join(' ');
+  const ds=m.dl.slice(0,8).map(d=>`${d.age}歳〜${d.kanji}（${d.yr}年/${wr(d.yr)}）${d.cur?'★現在':''}`).join('・');
+  const ry=[0,1,2].map(i=>nenchu(td.y+i)).map(r=>`${r.kanji}（${td.y+i}年/${r.wr}）`).join('・');
 
-  const fullName = sei && mei ? sei+' '+mei : name;
-  const prompt=`あなたは四柱推命を40年以上研究してきた最高峰の占い師です。以下のお客様に本格鑑定書を書いてください（8000〜10000字）。
+  const prompt=`あなたは四柱推命40年・姓名判断の熟練した最高峰の占い師です。以下の確定情報のみを使い、${name}への本格鑑定書を書いてください（8000〜10000字）。
+
+【今日の確定日付】${td.str}
+【今年〜3年の流年】${ry}
 
 【お客様情報】
-名前：${name}／性別：${gender}／年齢：${age}歳（${today.getFullYear()}年現在）
-生年月日：${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日${time?'／出生時刻：'+time:''}
+名前：${name}　性別：${gender}　年齢：${age}歳
+生年月日：${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wr(d.getFullYear())}${d.getMonth()+1}月${d.getDate()}日）${time?'　出生時刻：'+time:''}
 相談テーマ：${theme}
 ${memo?'悩み・状況：'+memo:''}
 ${origin?'出身・育ち：'+origin:''}
 ${job?'仕事・生活：'+job:''}
 ${past?'過去の転機：'+past:''}
 
-【確定命式（計算済み・絶対に変更不可）】
-${meshikiStr}
-五行バランス：${gokyoStr}
-日主：${m.nichi.kanji[0]}（${m.nichi.read}）／${m.yj.強弱}／用神：${m.yj.用神}
-十神：年干=${m.js['年干']}・月干=${m.js['月干']}・時干=${m.js['時干']}
-
+【確定命式（コード計算済み・変更禁止）】
+${ms}
+五行バランス：${gs}
+日主：${m.nichi.kanji[0]}（${m.nichi.read}）　${m.yj.kj}　用神：${m.yj.yj}
+十神：年干=${m.js.年干}　月干=${m.js.月干}　時干=${m.js.時干}
 ${seimeiStr}
-${seimeiStr?'⚠️ 姓名判断の五格も上記の通りです。勝手に変えないでください。':''}
 
-⚠️ 命式は上記の通り固定です。鑑定文中で必ずこの通りに記載してください。
+【確定大運（コード計算済み・変更禁止）】
+${ds}
+現在の大運：${m.curD.kanji}（${m.curD.age}歳〜${m.curD.age+9}歳　${m.curD.yr}〜${m.curD.yr+9}年　${wr(m.curD.yr)}〜${wr(m.curD.yr+9)}）
 
-【鑑定書の構成（各章800〜1200字）】
+⚠️ 重要：命式・大運・年号・画数はすべて上記の確定値を使うこと。絶対に変更しないこと。
+⚠️ 特に年号（令和・平成等）は計算済みの値のみ使用。間違った年号を絶対に出力しないこと。
+
+【鑑定書の構成】各章800〜1200字
+
 ## 第一章：命式の精密解読
-上記命式をそのまま使い、各柱の意味・五行バランス・日主の性質・用神を詳細解説
+確定命式をそのまま使い、各柱の意味・五行バランス・日主・用神を詳細解説。専門用語は必ず平易に説明。
 
-## 第二章：あなたという人間の本質
-日主・命式から読む魂の本質、強み、試練、人生テーマ。${origin||job||past?'提供された個人情報（出身・仕事・過去）を必ず反映し、この人固有の鑑定にすること':''}
+## 第二章：あなたという人間の本質${sg?'と姓名判断との照合':''}
+命式から読む魂の本質・強み・試練・人生テーマ。${sg?'姓名判断の五格と命式を照合し、名前のエネルギーと運命の方向性が一致しているか分析すること。':''}${origin||job?'提供された個人情報を必ず命式と照合し、この人固有の鑑定にすること。':''}
 
 ## 第三章：${theme}の徹底鑑定
-現在の大運・流年を踏まえ、時期・具体的な出来事・注意点を詳述。曖昧表現禁止
+現在の大運「${m.curD.kanji}」と今年の流年「${nenchu(td.y).kanji}（${wr(td.y)}）」の相互作用から具体的に鑑定。時期・出来事・注意点を明示。曖昧表現禁止。
 
 ## 第四章：恋愛・結婚・人間関係の命式分析
-命式から読む愛し方・縁の深い相手・関係性のパターン
+命式から読む愛し方・縁の深い相手の五行・関係性のパターンと課題
 
 ## 第五章：仕事・才能・お金の命式分析
-天職の方向性・金運のパターン・今後3年の仕事運
+天職の方向性・金運のパターン・今後3年（${ry}）の仕事運
 
 ## 第六章：10年・20年の運命の流れ
-大運の流れ・3つの転換期・最も輝く時期
+大運の流れを使い、人生の3つの転換期・最も輝く時期を年号付きで具体的に
 
 ## 第七章：開運の実践アドバイス
-用神に基づく色・方角・食べ物・今すぐできるアクション3つ
+用神「${m.yj.yj}」に基づく色・方角・食べ物・今すぐできるアクション3つ
 
 ## 第八章：${name}への手紙
-魂に届く言葉。この命式だからこそ言える、この人だけへのメッセージ
+命式${sg?'と姓名判断全体':'全体'}を見通したこの人だけへのメッセージ。この命式が示す使命と覚悟の言葉
 
-【ルール】${name}に直接語りかける温かい文体／命式は変更禁止／曖昧表現最小化／個人情報を必ず鑑定に反映`;
+【絶対ルール】
+・命式・大運・年号・画数はすべて上記確定値を使用・変更禁止
+・${name}に直接語りかける温かい文体
+・8000字以上厳守`;
 
-  try{
-    const text=await callAPI(prompt);
-    resultBox.className='result-box';
-    resultBox.textContent=text;
-    saveToSheet('四柱推命',name,birth,theme,text);
-  }catch(e){
-    resultBox.className='result-box';
-    resultBox.textContent='エラー：'+e.message+'\n\nAPIキーを確認してください。';
-  }
-  btn.disabled=false; btn.textContent='✨ 鑑定書を生成する';
+  try{const txt=await callAPI([{role:'user',content:prompt}]);rb.className='rbox';rb.textContent=txt;saveGAS('四柱推命',name,birth,theme,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='✨ 鑑定書を生成する';
 }
 
 // ══ 手相診断 生成 ══
-async function generateTesou(){
-  const apiKey=getApiKey(); if(!apiKey)return;
-  const name =document.getElementById('t-name').value.trim()||'お客様';
-  const hand =document.getElementById('t-hand').value;
+async function genTesou(){
+  const k=getKey();if(!k)return;
+  const name=document.getElementById('t-name').value.trim()||'お客様';
+  const hand=document.getElementById('t-hand').value;
   const theme=document.getElementById('t-theme').value;
-  const memo =document.getElementById('t-memo').value.trim();
-  const f1   =document.getElementById('t-file1').files[0];
-  const f2   =document.getElementById('t-file2').files[0];
+  const memo=document.getElementById('t-memo').value.trim();
+  const f1=document.getElementById('t-f1').files[0];
+  const f2=document.getElementById('t-f2').files[0];
   if(!f1){alert('1枚目の写真を選択してください');return;}
 
-  const btn=document.getElementById('t-btn');
-  btn.disabled=true; btn.textContent='生成中...';
-  const resultArea=document.getElementById('t-result-area');
-  const resultBox=document.getElementById('t-result');
-  resultArea.style.display='block';
-  resultBox.className='result-box loading';
-  resultBox.textContent='手相を精密に読み取り鑑定書を生成中（約1〜2分）...';
+  const btn=document.getElementById('t-btn');btn.disabled=true;btn.textContent='生成中...';
+  document.getElementById('t-ra').style.display='block';
+  const rb=document.getElementById('t-r');rb.className='rbox loading';rb.textContent='手相を精密に読み取り鑑定書を生成中（約1〜2分）...';
 
-  const toB64=(file)=>new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
-  const b1=await toB64(f1);
-  const images=[{type:f1.type||'image/jpeg',data:b1}];
-  if(f2){const b2=await toB64(f2);images.push({type:f2.type||'image/jpeg',data:b2});}
+  const toB64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(f);});
+  const b1=await toB64(f1);const imgs=[{type:f1.type||'image/jpeg',data:b1}];
+  if(f2){const b2=await toB64(f2);imgs.push({type:f2.type||'image/jpeg',data:b2});}
 
-  const handDesc=f2?'両手（2枚）':hand;
-  const todayInfo=getTodayInfo ? getTodayInfo() : {str: new Date().getFullYear()+'年'+(new Date().getMonth()+1)+'月'+new Date().getDate()+'日'};
-  const prompt=`あなたは手相鑑定を40年以上続けてきた最高峰の手相占い師です。添付の${handDesc}の写真を隅々まで観察し、${name}への本格手相鑑定書を作成してください（7000〜9000字）。
+  const td=today();const hdesc=f2?'両手（2枚）':hand;
 
-【今日の日付】${todayInfo.str}（年号・年をすべてこの日付を基準にすること。令和6年など間違った年号を絶対に使わないこと）
+  const prompt=`あなたは手相鑑定40年の最高峰の手相占い師です。添付の${hdesc}の写真を隅々まで観察し、${name}への本格手相鑑定書を作成してください（7000〜9000字）。
+
+【今日の確定日付】${td.str}（年号・日付はこの値のみ使用。令和6年などの誤った年号を絶対に使わないこと）
 
 【お客様情報】
-名前：${name}／診断する手：${handDesc}／相談テーマ：${theme}
+名前：${name}　診断する手：${hdesc}　相談テーマ：${theme}
 ${memo?'悩み・状況：'+memo:''}
-${f2?'※両手2枚。右手と左手を比較しながら鑑定してください':''}
+${f2?'※両手2枚あり。右手（先天性質）と左手（後天的な現在）を比較しながら鑑定してください':''}
 
-【鑑定書の構成（各章700〜1200字）】
+【鑑定書の構成】各章700〜1200字
+
 ## 第一章：手のひら全体の読み解き
-形・大きさ・肌質・指の特徴から読む気質とエネルギー
+写真から観察した形・大きさ・肌質・指の特徴を具体的に述べ、気質とエネルギーを読む
 
 ## 第二章：生命線の精密鑑定
-長さ・深さ・特徴（島・鎖・分岐）から読む体力・健康・生命力
+長さ・深さ・太さ・特徴（島・鎖・分岐・切れ目）を実際に観察して読む
 
 ## 第三章：感情線の精密鑑定
-カーブ・終点・特徴から読む愛し方・感情パターン・人間関係
+カーブ・終点・特徴から読む愛し方・感情表現・人間関係のパターン
 
 ## 第四章：頭脳線の精密鑑定
-方向・長さ・特徴から読む思考スタイル・才能・天職
+起点・方向・長さから読む思考スタイル・才能・最も活躍できる分野
 
 ## 第五章：運命線・結婚線・その他
-運命線・太陽線・結婚線・補助線の詳細読み
+運命線・太陽線・結婚線の有無と特徴・補助線の詳細
 
 ## 第六章：${theme}の徹底鑑定
-全手相を統合した${theme}の鑑定。時期・具体的展開・アドバイス
+全手相を統合した${theme}鑑定。時期・具体的展開。${memo?'「'+memo+'」への手相からの答えを含める':''}
 
 ## 第七章：開運の実践アドバイス
-手相から読む開運習慣・今すぐできるアクション3つ
+この手相から読む開運習慣・手相は変わる（どう意識すれば線が育つか）・今すぐできるアクション3つ
 
 ## 第八章：あなたの手が語る人生の物語
-この手相だからこそ言える、${name}への魂のメッセージ
+この手相だからこそ言える${name}の使命・才能・魂のメッセージ
 
-【ルール】写真の特徴を必ず具体的に言及／${name}に直接語りかける文体／7000字以上厳守`;
+【絶対ルール】
+・写真の特徴を必ず具体的に言及（「〜のように見えます」可、「見えません」禁止）
+・年号は今日の日付「${td.str}」のみ基準にすること
+・${name}に直接語りかける文体
+・7000字以上厳守`;
 
-  try{
-    const text=await callAPIWithImage(prompt,images);
-    resultBox.className='result-box';
-    resultBox.textContent=text;
-    saveToSheet('手相診断',name,'',theme,text);
-  }catch(e){
-    resultBox.className='result-box';
-    resultBox.textContent='エラー：'+e.message;
-  }
-  btn.disabled=false; btn.textContent='✨ 診断書を生成する';
+  try{const txt=await callAPIImg(prompt,imgs);rb.className='rbox';rb.textContent=txt;saveGAS('手相診断',name,'',theme,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='✨ 診断書を生成する';
 }
 
 // ══ 相性占い 生成 ══
-async function generateAisho(){
-  const apiKey=getApiKey(); if(!apiKey)return;
-  const aName =document.getElementById('a-name').value.trim()||'Aさん';
-  const aBirth=document.getElementById('a-birth').value;
-  const aTime =document.getElementById('a-time').value;
-  const aGend =document.getElementById('a-gender').value;
-  const bName =document.getElementById('b-name').value.trim()||'Bさん';
-  const bBirth=document.getElementById('b-birth').value;
-  const bTime =document.getElementById('b-time').value;
-  const bGend =document.getElementById('b-gender').value;
-  const rel   =document.getElementById('ab-rel').value;
-  const theme =document.getElementById('ab-theme').value;
-  const memo  =document.getElementById('ab-memo').value.trim();
-  if(!aBirth||!bBirth){alert('お二人の生年月日を入力してください');return;}
+async function genAisho(){
+  const k=getKey();if(!k)return;
+  const aSei=document.getElementById('a-sei').value.trim();const aMei=document.getElementById('a-mei').value.trim();
+  const bSei=document.getElementById('b-sei').value.trim();const bMei=document.getElementById('b-mei').value.trim();
+  const aName=(aSei+aMei)||document.getElementById('a-name').value.trim()||'Aさん';
+  const bName=(bSei+bMei)||document.getElementById('b-name').value.trim()||'Bさん';
+  const aB=document.getElementById('a-birth').value;const at=document.getElementById('a-time').value;const aG=document.getElementById('a-gender').value;
+  const bB=document.getElementById('b-birth').value;const bt=document.getElementById('b-time').value;const bG=document.getElementById('b-gender').value;
+  const rel=document.getElementById('ab-rel').value;const theme=document.getElementById('ab-theme').value;const memo=document.getElementById('ab-memo').value.trim();
+  if(!aB||!bB){alert('お二人の生年月日を入力してください');return;}
 
-  const btn=document.getElementById('ab-btn');
-  btn.disabled=true; btn.textContent='鑑定中...';
-  const resultArea=document.getElementById('ab-result-area');
-  const resultBox=document.getElementById('ab-result');
-  resultArea.style.display='block';
-  resultBox.className='result-box loading';
-  resultBox.textContent='二人の命式を照合し相性鑑定書を生成中（約1〜2分）...';
+  const btn=document.getElementById('ab-btn');btn.disabled=true;btn.textContent='鑑定中...';
+  document.getElementById('ab-ra').style.display='block';
+  const rb=document.getElementById('ab-r');rb.className='rbox loading';rb.textContent='二人の命式を照合し相性鑑定書を生成中（約1〜2分）...';
 
-  const da=new Date(aBirth), db=new Date(bBirth);
-  const mA=calcMeshiki(da.getFullYear(),da.getMonth()+1,da.getDate(),aTime?parseInt(aTime.split(':')[0]):null);
-  const mB=calcMeshiki(db.getFullYear(),db.getMonth()+1,db.getDate(),bTime?parseInt(bTime.split(':')[0]):null);
-  showMeshiki('a',mA); showMeshiki('b',mB);
+  const da=new Date(aB);const db=new Date(bB);
+  const ah=at?parseInt(at.split(':')[0]):null;const bh=bt?parseInt(bt.split(':')[0]):null;
+  const mA=meshiki(da.getFullYear(),da.getMonth()+1,da.getDate(),ah,aG);
+  const mB=meshiki(db.getFullYear(),db.getMonth()+1,db.getDate(),bh,bG);
+  showMeshiki('a',mA);showMeshiki('b',mB);
 
-  const fmt=(d)=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-  const mStr=(m)=>`年${m.nen.kanji}・月${m.tsuki.kanji}・日${m.nichi.kanji}・時${m.ji.kanji}／五行：${Object.entries(m.bal).map(([k,v])=>k+v).join(' ')}／日主：${m.nichi.kanji[0]}（${m.yj.強弱}）`;
-  const today=new Date();
+  const td=today();const ry=nenchu(td.y);
+  const fmt=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wr(d.getFullYear())}${d.getMonth()+1}月${d.getDate()}日）`;
+  const gs=b=>Object.entries(b).map(([k,v])=>`${k}${v}`).join(' ');
 
-  const fullName = sei && mei ? sei+' '+mei : name;
-  const prompt=`あなたは四柱推命を40年以上研究してきた最高峰の占い師です。二人の命式を精密に読み解き本格相性鑑定書を作成してください（6000〜8000字）。
+  const sgA=aSei&&aMei?calcSeimei(aSei,aMei):null;
+  const sgB=bSei&&bMei?calcSeimei(bSei,bMei):null;
+  const smStr=(sg,nm)=>sg?`${nm}の姓名判断：天格${sg['天格'].n}画(${sg['天格'].kk})・人格${sg['人格'].n}画(${sg['人格'].kk})・地格${sg['地格'].n}画(${sg['地格'].kk})・外格${sg['外格'].n}画(${sg['外格'].kk})・総格${sg['総格'].n}画(${sg['総格'].kk})${sg.unk.length?'（⚠️未登録文字あり・AI確認）':''}`:'';
 
-【確定命式（計算済み・絶対変更不可）】
-${aName}（${aGend}・${fmt(da)}生）：${mStr(mA)}
-${bName}（${bGend}・${fmt(db)}生）：${mStr(mB)}
+  const mStr=(m,nm,g,d,sg)=>`【${nm}（${g}・${fmt(d)}生）】
+命式：年${m.nen.kanji}・月${m.tsuki.kanji}・日${m.nichi.kanji}・時${m.ji.kanji}
+五行：${gs(m.bal)}　日主：${m.nichi.kanji[0]}（${m.yj.kj}）用神：${m.yj.yj}
+現在の大運：${m.curD.kanji}（${m.curD.age}歳〜${m.curD.age+9}歳　${wr(m.curD.yr)}〜${wr(m.curD.yr+9)}）
+${sg?smStr(sg,nm):''}`;
 
-お二人の関係：${rel}／相談テーマ：${theme}／現在：${today.getFullYear()}年
+  const prompt=`あなたは四柱推命40年・姓名判断の最高峰の占い師です。二人の命式を精密に読み解き本格相性鑑定書を作成してください（6000〜8000字）。
+
+【今日の確定日付】${td.str}
+【今年の流年】${ry.kanji}（${td.y}年/${wr(td.y)}）
+
+【確定命式＋姓名判断（コード計算済み・変更禁止）】
+${mStr(mA,aName,aG,da,sgA)}
+
+${mStr(mB,bName,bG,db,sgB)}
+
+お二人の関係：${rel}　相談テーマ：${theme}
 ${memo?'悩み・状況：'+memo:''}
 
-⚠️ 命式は上記の通り固定。鑑定文中では必ずこの通りに記載してください。
+⚠️ 命式・大運・年号・画数はすべて上記確定値を使用・変更禁止
 
 【鑑定書の構成】
-## 第一章：お二人それぞれの命式と本質（800字）
-両者の命式・日主・性質を簡潔に解説
+
+## 第一章：お二人それぞれの命式${sgA&&sgB?'・姓名判断':''}と本質（800字）
+両者の命式・日主・性質を解説。${sgA&&sgB?'姓名判断の五格も照合し、名前と命式のエネルギーが一致しているか分析。':''}専門用語は平易に説明
 
 ## 第二章：二つの命式が出会うとき（1000字）
-五行の相生相剋・引き合う理由・摩擦の理由・関係の本質テーマ
+五行の相生相剋・引き合う理由・摩擦の原因・関係の本質テーマ
 
 ## 第三章：${theme}の詳細鑑定（1200字）
-大運・流年を踏まえた具体的な鑑定。${memo?'「'+memo+'」への命式からの回答を含める':''}時期・展開・リスクを明示
+両者の現在の大運と今年の流年「${ry.kanji}（${wr(td.y)}）」を踏まえた具体的鑑定。時期・展開・リスク明示。${memo?'「'+memo+'」への命式からの答えを含める':''}
 
 ## 第四章：${aName}から見た${bName}（800字）
-${aName}の命式から見たBの存在意義・惹かれる理由・成長できること・注意点
+${aName}の命式から見たBの存在意義・惹かれる理由・注意点
 
 ## 第五章：${bName}から見た${aName}（800字）
 ${bName}の視点からの分析
 
 ## 第六章：関係をより良くするアドバイス（800字）
-五行的な接し方・避けるべきパターン・最も輝くタイミング
+五行的な接し方・避けるべきパターン・最も良い時期（年号付き）
 
 ## 第七章：${aName}への手紙（600字）
-この出会いの意味・学べること・二人の未来への魂のメッセージ
+この出会いの命式的な意味・二人の未来への魂のメッセージ
 
-【ルール】${aName}に直接語りかける文体／命式変更禁止／希望と現実のバランス`;
+【絶対ルール】
+・命式・年号・画数はすべて上記確定値使用・変更禁止
+・${aName}に直接語りかける文体・6000字以上厳守`;
 
-  try{
-    const text=await callAPI(prompt);
-    resultBox.className='result-box';
-    resultBox.textContent=text;
-    saveToSheet('相性占い',`${aName}×${bName}`,`A:${fmt(da)}/B:${fmt(db)}`,`${rel}/${theme}`,text);
-  }catch(e){
-    resultBox.className='result-box';
-    resultBox.textContent='エラー：'+e.message;
+  try{const txt=await callAPI([{role:'user',content:prompt}]);rb.className='rbox';rb.textContent=txt;saveGAS('相性占い',`${aName}×${bName}`,`A:${fmt(da)}/B:${fmt(db)}`,`${rel}/${theme}`,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='✨ 相性鑑定書を生成する';
+}
+
+
+// ════════════════════════════════════
+// 数秘術・九星気学・タロット・開運日・月運
+// ════════════════════════════════════
+
+// ── 数秘術計算 ──
+function calcNumerology(year, month, day){
+  const digits = String(year) + String(month).padStart(2,'0') + String(day).padStart(2,'0');
+  let total = [...digits].reduce((a,d)=>a+parseInt(d),0);
+  while(total > 9 && ![11,22,33].includes(total)){
+    total = [...String(total)].reduce((a,d)=>a+parseInt(d),0);
   }
-  btn.disabled=false; btn.textContent='✨ 相性鑑定書を生成する';
+  return total;
 }
 
-// ══ コピー ══
-function copyResult(id){
-  const t=document.getElementById(id).textContent;
-  navigator.clipboard.writeText(t).then(()=>alert('コピーしました！')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('コピーしました！');
-  });
+const NUM_MEANINGS = {
+  1:'リーダーシップ・独立・開拓者',2:'協調・直感・調和',3:'創造・表現・コミュニケーション',
+  4:'安定・努力・実務',5:'自由・変化・冒険',6:'愛・責任・奉仕',
+  7:'探求・分析・精神性',8:'成功・権力・物質的豊かさ',9:'完成・博愛・奉仕',
+  11:'直感・啓示・マスターナンバー',22:'建設・実現・マスターナンバー',33:'奉仕・愛・マスターナンバー'
+};
+
+// ── 九星気学計算 ──
+function calcKyusei(year, month, day){
+  // 節入り前は前年扱い（立春=2月4日頃）
+  const yr = (month > 2 || (month === 2 && day >= 4)) ? year : year - 1;
+  // 確定計算式: 2026=一白(1)を基準, 毎年逆行(-1)
+  let honmei = (1 + (2026 - yr)) % 9;
+  if(honmei === 0) honmei = 9;
+  const stars = ['','一白水星','二黒土星','三碧木星','四緑木星','五黄土星','六白金星','七赤金星','八白土星','九紫火星'];
+  const elements = ['','水','土','木','木','土','金','金','土','火'];
+  const dirs = ['','北','南西・北東','東','東南','中央','北西','西','北東・南西','南'];
+  return { n:honmei, name:stars[honmei], elem:elements[honmei], dir:dirs[honmei] };
 }
+
+// ── タロット78枚 ──
+const TAROT={
+  major: [
+    {n:'愚者(0)',u:'新しい始まり・自由・可能性',r:'無謀・不注意・チャンスの見逃し'},
+    {n:'魔術師(I)',u:'意志力・創造・スキル',r:'操作・詐欺・才能の無駄遣い'},
+    {n:'女教皇(II)',u:'直感・内なる知恵・神秘',r:'秘密・直感の無視・表面的'},
+    {n:'女帝(III)',u:'豊かさ・母性・創造力',r:'依存・停滞・創造性の枯渇'},
+    {n:'皇帝(IV)',u:'権威・安定・父性',r:'支配・頑固・柔軟性のなさ'},
+    {n:'教皇(V)',u:'伝統・指導・精神的知恵',r:'因習・束縛・権威への反発'},
+    {n:'恋人(VI)',u:'愛・選択・調和',r:'不一致・誘惑・価値観の相違'},
+    {n:'戦車(VII)',u:'意志・勝利・前進',r:'攻撃性・方向性の喪失・暴走'},
+    {n:'力(VIII)',u:'内なる力・忍耐・勇気',r:'弱さ・自己不信・感情の暴走'},
+    {n:'隠者(IX)',u:'内省・孤独・導き',r:'孤立・拒絶・内向きすぎる'},
+    {n:'運命の輪(X)',u:'転換期・チャンス・流れ',r:'悪運・停滞・変化への抵抗'},
+    {n:'正義(XI)',u:'公正・真実・バランス',r:'不公正・不誠実・偏り'},
+    {n:'吊るされた男(XII)',u:'忍耐・新視点・犠牲',r:'無駄な犠牲・停滞への執着'},
+    {n:'死神(XIII)',u:'変容・終わりと始まり・変化',r:'変化への恐れ・執着・停滞'},
+    {n:'節制(XIV)',u:'バランス・調和・適応',r:'不均衡・過剰・焦り'},
+    {n:'悪魔(XV)',u:'欲望・物質・束縛',r:'解放・自由・依存からの脱却'},
+    {n:'塔(XVI)',u:'突破・崩壊・解放',r:'変化の回避・崩壊の先延ばし'},
+    {n:'星(XVII)',u:'希望・癒し・インスピレーション',r:'希望の喪失・失望・悲観'},
+    {n:'月(XVIII)',u:'直感・幻想・潜在意識',r:'恐怖・混乱・欺き'},
+    {n:'太陽(XIX)',u:'成功・喜び・活力',r:'過度の楽観・傲慢・エネルギーの浪費'},
+    {n:'審判(XX)',u:'復活・覚醒・新章',r:'自己批判・過去への固執・変化の拒絶'},
+    {n:'世界(XXI)',u:'完成・達成・統合',r:'未完成・先延ばし・達成感の欠如'}
+  ]
+};
+
+let drawnCards = [];
+
+function drawCards(){
+  const spread = document.getElementById('tar-spread').value;
+  const count = spread.includes('1枚') ? 1 : spread.includes('3枚') ? 3 : 5;
+  const deck = [...TAROT.major];
+  drawnCards = [];
+  for(let i=0;i<count;i++){
+    const idx = Math.floor(Math.random()*deck.length);
+    const card = deck.splice(idx,1)[0];
+    const reversed = Math.random() < 0.3; // 30%で逆位置
+    drawnCards.push({...card, reversed});
+  }
+  const box = document.getElementById('tar-cards-box');
+  const cardsEl = document.getElementById('tar-cards');
+  const labels = count===1?['答え']:count===3?['過去','現在','未来']:['現状','課題','過去','未来','結果'];
+  cardsEl.innerHTML = drawnCards.map((c,i)=>
+    `<span class="tag g" style="display:block;width:100%;margin-bottom:4px;">${labels[i]||''}：${c.n} ${c.reversed?'【逆位置】':'【正位置】'}<br><span style="font-size:.72rem;color:var(--text3)">${c.reversed?c.r:c.u}</span></span>`
+  ).join('');
+  box.style.display='block';
+  document.getElementById('tar-btn').disabled=false;
+}
+
+// ── 開運日計算 ──
+const TENSYA=['戊寅','甲午','戊申','甲子'];
+const ICHIRYU_SHI=[0,1,2,6]; // 子丑寅未
+
+function getKanshi(y,m,d){
+  const diff=(new Date(y,m-1,d)-new Date(2024,0,1))/(86400000);
+  const k=((9+diff)%10+10)%10, s=((1+diff)%12+12)%12;
+  return KAN[k]+SHI[s];
+}
+
+function calcKaiun(year, month){
+  const results=[];
+  const days=new Date(year,month,0).getDate();
+  for(let d=1;d<=days;d++){
+    const ks=getKanshi(year,month,d);
+    const tags=[];
+    if(TENSYA.includes(ks))tags.push('天赦日');
+    const shiIdx=SHI.indexOf(ks[1]);
+    if(ICHIRYU_SHI.includes(shiIdx))tags.push('一粒万倍日');
+    // 大明日（12種の吉凶）簡易版
+    const kanIdx=KAN.indexOf(ks[0]);
+    if([0,2,4,6,8].includes(kanIdx)&&[0,2,4,6,8,10].includes(shiIdx))tags.push('大明日');
+    if(tags.length>0)results.push({d,ks,tags});
+  }
+  return results;
+}
+
+// ── 月命星計算 ──
+function calcGetsumei(honmei, year, month){
+  // 月命星：年盤の本命星位置から月盤を計算
+  const stars=['','一白水星','二黒土星','三碧木星','四緑木星','五黄土星','六白金星','七赤金星','八白土星','九紫火星'];
+  // 月の基準値（寅月=2月節から順に）
+  const monthOffset=[2,3,4,5,6,7,8,9,10,11,0,1]; // 1月→offset2...
+  const base=[8,7,4,1,7,4,1,7,4,1][honmei%9||9-1]||5;
+  let n=((base - monthOffset[month-1] + 9 -1) % 9) + 1;
+  if(n<=0)n+=9;
+  return {n, name:stars[n]||stars[5]};
+}
+
+// ── 数秘術 生成 ──
+async function genNumerology(){
+  const k=getKey();if(!k)return;
+  const sei_=document.getElementById('num-sei')?.value.trim()||'';
+  const mei_=document.getElementById('num-mei')?.value.trim()||'';
+  const name=(sei_+mei_)||document.getElementById('num-name')?.value.trim()||'お客様';
+  // 姓名判断計算
+  const sg_=sei_&&mei_?calcSeimei(sei_,mei_):null;
+  if(sg_){
+    const cm={'大吉':'ok','吉':'warn','凶':'ng'};
+    const stags=document.getElementById('num-stags');
+    const sbox=document.getElementById('num-sbox');
+    if(stags)stags.innerHTML=Object.entries({'天格':sg_['天格'],'人格':sg_['人格'],'地格':sg_['地格'],'外格':sg_['外格'],'総格':sg_['総格']}).map(([k,v])=>'<span class="tag '+(cm[v.kk]||'')+'" >'+k+'：'+v.n+'画（'+v.kk+'）</span>').join('');
+    if(sbox)sbox.style.display='block';
+  }
+  const seimeiStr_=sg_?'\n【姓名判断（熊崎式五格）】天格'+sg_['天格'].n+'画('+sg_['天格'].kk+')・人格'+sg_['人格'].n+'画('+sg_['人格'].kk+')・地格'+sg_['地格'].n+'画('+sg_['地格'].kk+')・外格'+sg_['外格'].n+'画('+sg_['外格'].kk+')・総格'+sg_['総格'].n+'画('+sg_['総格'].kk+')'+(sg_.unk.length?'　⚠️未登録:'+sg_.unk.join(''):''):'';
+  const birth=document.getElementById('num-birth').value;
+  const gender=document.getElementById('num-gender').value;
+  const theme=document.getElementById('num-theme').value;
+  const memo=document.getElementById('num-memo').value.trim();
+  if(!birth){alert('生年月日を入力してください');return;}
+
+  const d=new Date(birth);
+  const lpn=calcNumerology(d.getFullYear(),d.getMonth()+1,d.getDate());
+  const meaning=NUM_MEANINGS[lpn]||'';
+
+  // 誕生日数・運命数も計算
+  const birthdayNum=d.getDate()>9?d.getDate()%9||9:d.getDate();
+  const destDigits=String(d.getMonth()+1)+String(d.getDate());
+  let destNum=[...destDigits].reduce((a,c)=>a+parseInt(c),0);
+  while(destNum>9&&![11,22,33].includes(destNum))destNum=[...String(destNum)].reduce((a,c)=>a+parseInt(c),0);
+
+  const box=document.getElementById('num-result-box');
+  const tags=document.getElementById('num-tags');
+  tags.innerHTML=`<span class="tag g">ライフパス：${lpn}（${meaning}）</span><span class="tag">誕生日数：${birthdayNum}</span><span class="tag">運命数：${destNum}</span>`;
+  box.style.display='block';
+
+  const btn=document.getElementById('num-btn');btn.disabled=true;btn.textContent='生成中...';
+  document.getElementById('num-ra').style.display='block';
+  const rb=document.getElementById('num-r');rb.className='rbox loading';rb.textContent='数秘術鑑定書を生成中...';
+
+  const td=today();
+  const prompt=`あなたは数秘術（ヌメロロジー）の最高峰の鑑定士です。以下の確定情報を使い、${name}への本格数秘術鑑定書を書いてください（5000〜7000字）。
+
+【今日の確定日付】${td.str}
+
+【お客様情報】
+名前：${name}　性別：${gender}　相談テーマ：${theme}
+生年月日：${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日
+${memo?'悩み・状況：'+memo:''}
+${seimeiStr_}
+
+【確定数秘情報（計算済み・変更禁止）】
+ライフパスナンバー：${lpn}（${meaning}）
+誕生日数：${birthdayNum}
+運命数：${destNum}
+
+⚠️ 上記の数字は計算済みです。絶対に変更しないこと。
+
+【鑑定書の構成】
+
+## 第一章：ライフパスナンバー${lpn}の意味
+${lpn}が持つ本質的な意味・エネルギー・この数字を持つ人の特徴を詳しく解説
+
+## 第二章：あなたという人間の本質${seimeiStr_?'と姓名判断との照合':''}
+ライフパス・誕生日数・運命数を総合して読む魂の本質・強み・試練。${seimeiStr_?'姓名判断の五格と数秘術の数字を照合し、名前が持つエネルギーと数字の方向性が一致しているか分析すること。':''}
+
+## 第三章：${theme}の徹底鑑定
+数秘術から読む${theme}の傾向・今年今月の運気・具体的なアドバイス
+
+## 第四章：人間関係・恋愛・相性
+ライフパス${lpn}の人が縁の深い数字・相性の良いタイプ・注意すべきパターン
+
+## 第五章：仕事・天職・金運
+この数字が示す天職の方向性・稼ぎ方のパターン・金運の特徴
+
+## 第六章：開運のための実践アドバイス
+この数字に合った色・方角・行動習慣・今すぐできるアクション3つ
+
+## 第七章：${name}へのメッセージ
+この数字を持って生まれた意味・使命・魂に届く言葉
+
+【ルール】${name}に直接語りかける文体・5000字以上厳守`;
+
+  try{const txt=await callAPI([{role:'user',content:prompt}]);rb.className='rbox';rb.textContent=txt;saveGAS('数秘術',name,birth,theme,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='✨ 鑑定書を生成する';
+}
+
+// ── 九星気学 生成 ──
+async function genKyusei(){
+  const k=getKey();if(!k)return;
+  const sei_=document.getElementById('kyu-sei')?.value.trim()||'';
+  const mei_=document.getElementById('kyu-mei')?.value.trim()||'';
+  const name=(sei_+mei_)||document.getElementById('kyu-name')?.value.trim()||'お客様';
+  // 姓名判断計算
+  const sg_=sei_&&mei_?calcSeimei(sei_,mei_):null;
+  if(sg_){
+    const cm={'大吉':'ok','吉':'warn','凶':'ng'};
+    const stags=document.getElementById('kyu-stags');
+    const sbox=document.getElementById('kyu-sbox');
+    if(stags)stags.innerHTML=Object.entries({'天格':sg_['天格'],'人格':sg_['人格'],'地格':sg_['地格'],'外格':sg_['外格'],'総格':sg_['総格']}).map(([k,v])=>'<span class="tag '+(cm[v.kk]||'')+'" >'+k+'：'+v.n+'画（'+v.kk+'）</span>').join('');
+    if(sbox)sbox.style.display='block';
+  }
+  const seimeiStr_=sg_?'\n【姓名判断（熊崎式五格）】天格'+sg_['天格'].n+'画('+sg_['天格'].kk+')・人格'+sg_['人格'].n+'画('+sg_['人格'].kk+')・地格'+sg_['地格'].n+'画('+sg_['地格'].kk+')・外格'+sg_['外格'].n+'画('+sg_['外格'].kk+')・総格'+sg_['総格'].n+'画('+sg_['総格'].kk+')'+(sg_.unk.length?'　⚠️未登録:'+sg_.unk.join(''):''):'';
+  const birth=document.getElementById('kyu-birth').value;
+  const gender=document.getElementById('kyu-gender').value;
+  const theme=document.getElementById('kyu-theme').value;
+  const memo=document.getElementById('kyu-memo').value.trim();
+  if(!birth){alert('生年月日を入力してください');return;}
+
+  const d=new Date(birth);
+  const kyu=calcKyusei(d.getFullYear(),d.getMonth()+1,d.getDate());
+  const td=today();
+  const curKyu=calcKyusei(td.y,td.m,1);
+  const monthKyu=calcGetsumei(kyu.n,td.y,td.m);
+
+  const box=document.getElementById('kyu-result-box');
+  const tags=document.getElementById('kyu-tags');
+  tags.innerHTML=`<span class="tag g">本命星：${kyu.name}</span><span class="tag g">属性：${kyu.elem}　吉方位：${kyu.dir}</span><span class="tag">今月の月命星：${monthKyu.name}</span>`;
+  box.style.display='block';
+
+  const btn=document.getElementById('kyu-btn');btn.disabled=true;btn.textContent='生成中...';
+  document.getElementById('kyu-ra').style.display='block';
+  const rb=document.getElementById('kyu-r');rb.className='rbox loading';rb.textContent='九星気学鑑定書を生成中...';
+
+  const prompt=`あなたは九星気学の最高峰の鑑定士です。以下の確定情報を使い、${name}への本格九星気学鑑定書を書いてください（5000〜7000字）。
+
+【今日の確定日付】${td.str}
+
+【お客様情報】
+名前：${name}　性別：${gender}　相談テーマ：${theme}
+生年月日：${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wr(d.getFullYear())}）
+${memo?'悩み・状況：'+memo:''}
+${seimeiStr_}
+
+【確定九星情報（計算済み・変更禁止）】
+本命星：${kyu.name}（${kyu.n}）
+五行属性：${kyu.elem}　基本吉方位：${kyu.dir}
+今月（${td.y}年${td.m}月）の月命星：${monthKyu.name}
+
+⚠️ 上記の星は計算済みです。変更禁止。年号も上記確定値のみ使用。
+
+【鑑定書の構成】
+
+## 第一章：${kyu.name}の本質
+この星が持つ性質・エネルギー・性格の特徴を詳しく解説
+
+## 第二章：あなたという人間の本質
+本命星から読む魂の本質・強み・試練・人生テーマ
+
+## 第三章：${theme}の徹底鑑定
+今年（${wr(td.y)}）・今月（${td.m}月）の九星盤から読む${theme}の運気・具体的なアドバイス
+
+## 第四章：方位と引越し・旅行の運
+今年・今月の吉方位と凶方位・具体的な活用法
+
+## 第五章：相性の良い星・人間関係
+${kyu.name}と相性が良い本命星・相性に注意が必要な星・人間関係の特徴
+
+## 第六章：開運の実践アドバイス
+この星に合った色・インテリア・習慣・今すぐできるアクション3つ
+
+## 第七章：${name}へのメッセージ
+この星を持って生まれた意味・使命・魂に届く言葉
+
+【ルール】${name}に直接語りかける文体・5000字以上厳守・年号は確定値のみ`;
+
+  try{const txt=await callAPI([{role:'user',content:prompt}]);rb.className='rbox';rb.textContent=txt;saveGAS('九星気学',name,birth,theme,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='✨ 鑑定書を生成する';
+}
+
+// ── タロット 生成 ──
+async function genTarot(){
+  const k=getKey();if(!k)return;
+  const sei_=document.getElementById('tar-sei')?.value.trim()||'';
+  const mei_=document.getElementById('tar-mei')?.value.trim()||'';
+  const name=(sei_+mei_)||document.getElementById('tar-name')?.value.trim()||'お客様';
+  // 姓名判断計算
+  const sg_=sei_&&mei_?calcSeimei(sei_,mei_):null;
+  if(sg_){
+    const cm={'大吉':'ok','吉':'warn','凶':'ng'};
+    const stags=document.getElementById('tar-stags');
+    const sbox=document.getElementById('tar-sbox');
+    if(stags)stags.innerHTML=Object.entries({'天格':sg_['天格'],'人格':sg_['人格'],'地格':sg_['地格'],'外格':sg_['外格'],'総格':sg_['総格']}).map(([k,v])=>'<span class="tag '+(cm[v.kk]||'')+'" >'+k+'：'+v.n+'画（'+v.kk+'）</span>').join('');
+    if(sbox)sbox.style.display='block';
+  }
+  const seimeiStr_=sg_?'\n【姓名判断（熊崎式五格）】天格'+sg_['天格'].n+'画('+sg_['天格'].kk+')・人格'+sg_['人格'].n+'画('+sg_['人格'].kk+')・地格'+sg_['地格'].n+'画('+sg_['地格'].kk+')・外格'+sg_['外格'].n+'画('+sg_['外格'].kk+')・総格'+sg_['総格'].n+'画('+sg_['総格'].kk+')'+(sg_.unk.length?'　⚠️未登録:'+sg_.unk.join(''):''):'';
+  const theme=document.getElementById('tar-theme').value;
+  const memo=document.getElementById('tar-memo').value.trim();
+  const spread=document.getElementById('tar-spread').value;
+  if(drawnCards.length===0){alert('先にカードを引いてください');return;}
+
+  const btn=document.getElementById('tar-btn');btn.disabled=true;btn.textContent='生成中...';
+  document.getElementById('tar-ra').style.display='block';
+  const rb=document.getElementById('tar-r');rb.className='rbox loading';rb.textContent='タロット鑑定書を生成中...';
+
+  const td=today();
+  const labels=drawnCards.length===1?['答え']:drawnCards.length===3?['過去','現在','未来']:['現状','課題','過去','未来','結果'];
+  const cardsStr=drawnCards.map((c,i)=>{const pos=c.reversed?'【逆位置】（'+c.r+'）':'【正位置】（'+c.u+'）';return labels[i]+'：'+c.n+' '+pos;}).join('\n');
+
+
+  const prompt=`あなたはタロット鑑定40年の最高峰のタロット占い師です。以下の引いたカードを使い、${name}への本格タロット鑑定書を書いてください（4000〜6000字）。
+
+【今日の確定日付】${td.str}
+
+【お客様情報】
+名前：${name}　テーマ：${theme}
+${memo?'質問・状況：'+memo:''}
+${seimeiStr_}
+
+【展開法】${spread}
+
+【引いたカード（確定・変更禁止）】
+${cardsStr}
+
+⚠️ 上記のカードは実際に引いたものです。カードを変更したり、引いていないカードを追加しないこと。
+
+【鑑定書の構成】
+
+## 第一章：カードの全体的な読み
+引いたカード全体が語るメッセージ・現在の状況の本質
+
+## 第二章：各カードの詳細解釈
+各カードの意味・今の${name}の状況への具体的な当てはめ
+
+## 第三章：${theme}への答え
+${memo?'「'+memo+'」という質問への':''}タロットからの具体的な答えと導き
+
+## 第四章：近い未来の展開
+カードが示す今後3ヶ月〜半年の流れ・注意すべきこと
+
+## 第五章：アドバイスと行動指針
+カードが示す「すべきこと」「避けるべきこと」・今すぐできるアクション
+
+## 第六章：${name}へのメッセージ
+タロットが${name}に伝えたい最も大切なメッセージ
+
+【ルール】${name}に直接語りかける文体・4000字以上厳守・引いたカード以外使用禁止`;
+
+  try{const txt=await callAPI([{role:'user',content:prompt}]);rb.className='rbox';rb.textContent=txt;saveGAS('タロット',name,'',theme,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='✨ 鑑定書を生成する';
+}
+
+// ── 開運日カレンダー 生成 ──
+async function genCalendar(){
+  const k=getKey();if(!k)return;
+  const sei_=document.getElementById('cal-sei')?.value.trim()||'';
+  const mei_=document.getElementById('cal-mei')?.value.trim()||'';
+  const name=(sei_+mei_)||document.getElementById('cal-name')?.value.trim()||'お客様';
+  // 姓名判断計算
+  const sg_=sei_&&mei_?calcSeimei(sei_,mei_):null;
+  if(sg_){
+    const cm={'大吉':'ok','吉':'warn','凶':'ng'};
+    const stags=document.getElementById('cal-stags');
+    const sbox=document.getElementById('cal-sbox');
+    if(stags)stags.innerHTML=Object.entries({'天格':sg_['天格'],'人格':sg_['人格'],'地格':sg_['地格'],'外格':sg_['外格'],'総格':sg_['総格']}).map(([k,v])=>'<span class="tag '+(cm[v.kk]||'')+'" >'+k+'：'+v.n+'画（'+v.kk+'）</span>').join('');
+    if(sbox)sbox.style.display='block';
+  }
+  const seimeiStr_=sg_?'\n【姓名判断（熊崎式五格）】天格'+sg_['天格'].n+'画('+sg_['天格'].kk+')・人格'+sg_['人格'].n+'画('+sg_['人格'].kk+')・地格'+sg_['地格'].n+'画('+sg_['地格'].kk+')・外格'+sg_['外格'].n+'画('+sg_['外格'].kk+')・総格'+sg_['総格'].n+'画('+sg_['総格'].kk+')'+(sg_.unk.length?'　⚠️未登録:'+sg_.unk.join(''):''):'';
+  const birth=document.getElementById('cal-birth').value;
+  const monthVal=document.getElementById('cal-month').value;
+  const purpose=document.getElementById('cal-purpose').value;
+  if(!monthVal){alert('表示する月を選択してください');return;}
+
+  const [y,m]=monthVal.split('-').map(Number);
+  const kaiun=calcKaiun(y,m);
+
+  const btn=document.getElementById('cal-btn');btn.disabled=true;btn.textContent='計算中...';
+  document.getElementById('cal-ra').style.display='block';
+  const rb=document.getElementById('cal-r');rb.className='rbox loading';rb.textContent='開運日を計算中...';
+
+  // 命式も計算（生年月日がある場合）
+  let meshikiStr='';
+  if(birth){
+    const d=new Date(birth);
+    const m2=meshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),null,'女性');
+    meshikiStr=`
+日主：${m2.nichi.kanji[0]}　用神：${m2.yj.yj}　現在の大運：${m2.curD.kanji}`;
+  }
+
+  const kaiuStr=kaiun.map(r=>r.d+'日('+r.ks+')：'+r.tags.join('・')).map(r=>y+'年'+m+'月'+r).join('\n');
+  const td=today();
+
+  const prompt=`あなたは四柱推命・暦学の最高峰の鑑定士です。${name}の${y}年${m}月（${wr(y)}${m}月）の開運日カレンダーを作成してください。
+
+【今日の確定日付】${td.str}
+
+【お客様情報】
+名前：${name}　用途：${purpose}
+${meshikiStr}
+${seimeiStr_}
+
+【${y}年${m}月の吉日一覧（計算済み・変更禁止）】
+${kaiuStr||'今月は主要な吉日なし（大安・仏滅等で補足してください）'}
+
+⚠️ 上記の日程は計算済みです。日程を変更したり存在しない吉日を追加しないこと。
+
+以下の内容でレポートを作成してください：
+
+## ${y}年${m}月（${wr(y)}${m}月）開運日カレンダー
+
+### 今月の全体的な運気
+${y}年${m}月の月干支と全体的な運気の流れ
+
+### 特に重要な吉日（ベスト3）
+上記の吉日の中で${purpose}に最適な日ベスト3を選んでその理由を詳しく説明
+
+### 日ごとの詳細解説
+各吉日について、その日の特徴・向いている行動・具体的な使い方を解説
+
+### 避けるべき日・注意日
+今月の注意が必要な日（仏滅・不成就日等）とその理由
+
+### ${name}へのアドバイス
+${purpose}を成功させるための今月の心がけと行動指針
+
+【ルール】具体的な日付を必ず含める・${name}に語りかける文体`;
+
+  try{const txt=await callAPI([{role:'user',content:prompt}],8000);rb.className='rbox';rb.textContent=txt;saveGAS('開運日',name,birth||'',purpose,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='📅 開運日を計算する';
+}
+
+// ── 月運レポート 生成 ──
+async function genReport(){
+  const k=getKey();if(!k)return;
+  const sei_=document.getElementById('rep-sei')?.value.trim()||'';
+  const mei_=document.getElementById('rep-mei')?.value.trim()||'';
+  const name=(sei_+mei_)||document.getElementById('rep-name')?.value.trim()||'お客様';
+  // 姓名判断計算
+  const sg_=sei_&&mei_?calcSeimei(sei_,mei_):null;
+  if(sg_){
+    const cm={'大吉':'ok','吉':'warn','凶':'ng'};
+    const stags=document.getElementById('rep-stags');
+    const sbox=document.getElementById('rep-sbox');
+    if(stags)stags.innerHTML=Object.entries({'天格':sg_['天格'],'人格':sg_['人格'],'地格':sg_['地格'],'外格':sg_['外格'],'総格':sg_['総格']}).map(([k,v])=>'<span class="tag '+(cm[v.kk]||'')+'" >'+k+'：'+v.n+'画（'+v.kk+'）</span>').join('');
+    if(sbox)sbox.style.display='block';
+  }
+  const seimeiStr_=sg_?'\n【姓名判断（熊崎式五格）】天格'+sg_['天格'].n+'画('+sg_['天格'].kk+')・人格'+sg_['人格'].n+'画('+sg_['人格'].kk+')・地格'+sg_['地格'].n+'画('+sg_['地格'].kk+')・外格'+sg_['外格'].n+'画('+sg_['外格'].kk+')・総格'+sg_['総格'].n+'画('+sg_['総格'].kk+')'+(sg_.unk.length?'　⚠️未登録:'+sg_.unk.join(''):''):'';
+  const birth=document.getElementById('rep-birth').value;
+  const gender=document.getElementById('rep-gender').value;
+  const monthSel=document.getElementById('rep-month-sel').value;
+  const focus=document.getElementById('rep-focus').value.trim();
+  if(!birth){alert('生年月日を入力してください');return;}
+
+  const td=today();
+  const targetM=monthSel==='today'?td.m:td.m===12?1:td.m+1;
+  const targetY=monthSel==='today'?td.y:(td.m===12?td.y+1:td.y);
+
+  const d=new Date(birth);
+  let age=td.y-d.getFullYear();
+  if(td.m<d.getMonth()+1||(td.m===d.getMonth()+1&&td.d<d.getDate()))age--;
+
+  const m=meshiki(d.getFullYear(),d.getMonth()+1,d.getDate(),null,gender);
+  const monthKS=nenchu(targetY);
+  // 月干支
+  const nen_k=((targetY-4)+400)%10;
+  const smap2=[1,2,3,4,5,6,7,8,9,10,11,0];
+  const mshi=smap2[targetM-1];
+  const mbase=[2,4,6,8,0][nen_k%5];
+  const mkan=(mbase+(mshi-2+12)%12)%10;
+  const monthKanshi=KAN[mkan]+SHI[mshi];
+  const kaiun=calcKaiun(targetY,targetM);
+  const topDays=kaiun.filter(r=>r.tags.includes('天赦日')||r.tags.length>=2).slice(0,5);
+
+  const box=document.getElementById('rep-info-box');
+  const tags=document.getElementById('rep-tags');
+  tags.innerHTML=`<span class="tag g">対象月：${targetY}年${targetM}月（${wr(targetY)}）</span><span class="tag g">月干支：${monthKanshi}</span><span class="tag">現在の大運：${m.curD.kanji}</span><span class="tag">特吉日数：${kaiun.length}日</span>`;
+  box.style.display='block';
+
+  const btn=document.getElementById('rep-btn');btn.disabled=true;btn.textContent='生成中...';
+  document.getElementById('rep-ra').style.display='block';
+  const rb=document.getElementById('rep-r');rb.className='rbox loading';rb.textContent='月運レポートを生成中...';
+
+  const topDaysStr=topDays.map(r=>targetM+'月'+r.d+'日('+r.ks+')：'+r.tags.join('・')).join('\n')||'（特別な吉日なし）';
+
+  const prompt=`あなたは四柱推命40年の最高峰の占い師です。${name}の${targetY}年${targetM}月（${wr(targetY)}${targetM}月）の運気レポートを作成してください（4000〜5000字）。
+
+【確定情報（変更禁止）】
+対象月：${targetY}年${targetM}月（${wr(targetY)}${targetM}月）
+月干支：${monthKanshi}
+命式：年${m.nen.kanji}・月${m.tsuki.kanji}・日${m.nichi.kanji}・時${m.ji.kanji}
+五行：${Object.entries(m.bal).map(([k,v])=>k+v).join(' ')}
+日主：${m.nichi.kanji[0]}（${m.yj.kj}）用神：${m.yj.yj}
+現在の大運：${m.curD.kanji}（${m.curD.age}歳〜）
+今月の特吉日：${topDaysStr}
+${focus?'重点テーマ：'+focus:''}
+${seimeiStr_}
+
+⚠️ 命式・年号・日程は確定値のみ使用・変更禁止
+
+【月運レポートの構成】
+
+## ${targetY}年${targetM}月（${wr(targetY)}）の全体運
+月干支「${monthKanshi}」と現在の大運「${m.curD.kanji}」の相互作用から読む今月全体の流れ
+
+## 恋愛・人間関係運
+今月の恋愛・対人関係の傾向と具体的なアドバイス
+
+## 仕事・金運
+今月の仕事運・金運の傾向と具体的なアドバイス
+
+## 健康・体調
+今月注意すべき体調・心身のケアポイント
+
+## 今月の開運日ベスト3
+${topDays.length>0?topDays.slice(0,3).map(r=>`${targetM}月${r.d}日(${r.ks})：${r.tags.join('・')}`).join('、'):'暦の吉日を使って'}最も行動すべき日とその活用法
+
+## 今月の心がけと行動指針
+今月を最高の月にするための5つの具体的アドバイス
+
+## ${name}へのメッセージ
+今月の${name}への励ましと導きの言葉
+
+【ルール】${name}に直接語りかける文体・月額サービスの月次レポートとして使えるクオリティで・4000字以上`;
+
+  try{const txt=await callAPI([{role:'user',content:prompt}],8000);rb.className='rbox';rb.textContent=txt;saveGAS('月運レポート',name,birth,`${targetY}年${targetM}月`,txt);}
+  catch(e){rb.className='rbox';rb.textContent='エラー：'+e.message;}
+  btn.disabled=false;btn.textContent='📊 月運レポートを生成する';
+}
+
+// ── コピー ──
+function cp(id){const t=document.getElementById(id).textContent;navigator.clipboard.writeText(t).then(()=>alert('コピーしました！')).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('コピーしました！');});}
 </script>
 </body>
 </html>
